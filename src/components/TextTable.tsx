@@ -318,8 +318,5 @@ function ScoreCell({ value, max, percent }: { value: number | null; max: number;
 }
 
 function RankBadge({ pos }: { pos: number }) {
-  if (pos === 1) return <span className="rank-badge gold">1</span>
-  if (pos === 2) return <span className="rank-badge silver">2</span>
-  if (pos === 3) return <span className="rank-badge bronze">3</span>
   return <span className="rank-badge plain">{pos}</span>
 }

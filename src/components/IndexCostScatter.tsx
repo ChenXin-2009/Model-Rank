@@ -145,6 +145,8 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
   const dragRef = useRef<{ sx: number; sy: number; view: View; moved: boolean } | null>(null)
   const viewRef = useRef<View | null>(view)
   const animRef = useRef<number | null>(null)
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map())
+  const pinchRef = useRef<{ dist: number; view: View } | null>(null)
 
   /** 带缓动的视图迁移（easeOutCubic，260ms），缩放/重置都走这里 */
   function animateTo(to: View) {
@@ -227,11 +229,41 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
     const v = viewRef.current
     if (!v) return
     if (animRef.current) cancelAnimationFrame(animRef.current)
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    if (pointersRef.current.size === 2) {
+      const [a, b] = [...pointersRef.current.values()]
+      const dist = Math.hypot(b.x - a.x, b.y - a.y)
+      pinchRef.current = { dist: Math.max(dist, 1), view: v }
+      dragRef.current = null
+      setDragging(false)
+      return
+    }
     ;(e.target as Element).setPointerCapture?.(e.pointerId)
     dragRef.current = { sx: e.clientX, sy: e.clientY, view: v, moved: false }
     setDragging(true)
   }
   const onPointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    const pt = pointersRef.current.get(e.pointerId)
+    if (!pt) return
+    pt.x = e.clientX
+    pt.y = e.clientY
+    if (pointersRef.current.size >= 2) {
+      const pinch = pinchRef.current
+      if (pinch && full && svgRef.current) {
+        const [a, b] = [...pointersRef.current.values()]
+        const dist = Math.max(Math.hypot(b.x - a.x, b.y - a.y), 1)
+        const factor = dist / pinch.dist
+        pinch.dist = dist
+        const rect = svgRef.current.getBoundingClientRect()
+        const s = W / rect.width
+        const mx = ((a.x + b.x) / 2 - rect.left) * s
+        const my = ((a.y + b.y) / 2 - rect.top) * s
+        const nv = zoomAt(mx, my, factor, pinch.view, full)
+        viewRef.current = nv
+        setView(nv)
+      }
+      return
+    }
     const drag = dragRef.current
     if (!drag || !full) return
     if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 3) drag.moved = true
@@ -251,9 +283,13 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
     if (yMin + yRange < Y_FULL_MIN) yMin = Y_FULL_MIN - yRange
     setView({ lxMin, lxMax: lxMin + xRange, yMin, yMax: yMin + yRange })
   }
-  const onPointerUp = () => {
-    dragRef.current = null
-    setDragging(false)
+  const onPointerUp = (e: React.PointerEvent<SVGSVGElement>) => {
+    pointersRef.current.delete(e.pointerId)
+    if (pointersRef.current.size < 2) pinchRef.current = null
+    if (pointersRef.current.size === 0) {
+      dragRef.current = null
+      setDragging(false)
+    }
   }
   const resetView = () => {
     if (!full) return
@@ -328,7 +364,7 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
         <span className="chart-badge">性价比</span>
         <button className="btn btn-sm" onClick={resetView}>↺ 重置视图</button>
       </div>
-      <p className="chart-desc">横轴：综合价格（$/1M，对数坐标）· 纵轴：智能指数 · 滚轮以屏幕中心等比缩放（带缓动）</p>
+      <p className="chart-desc">横轴：综合价格（$/1M，对数坐标）· 纵轴：智能指数 · 滚轮/双指捏合以屏幕中心等比缩放（带缓动）</p>
 
       <svg
         viewBox={`0 0 ${W} ${H}`}
@@ -339,6 +375,7 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
         onPointerLeave={onPointerUp}
       >
         {xSubTicks.map((t) => (
@@ -415,7 +452,7 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
         )}
       </div>
 
-      <p className="chart-unit">悬停查看详情，点击跳转模型页 · 滚轮等比缩放、拖动平移 · 名称始终显示</p>
+      <p className="chart-unit">悬停查看详情，点击跳转模型页 · 滚轮/双指等比缩放、拖动平移 · 名称始终显示</p>
     </section>
   )
 }

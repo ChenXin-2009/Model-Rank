@@ -171,6 +171,9 @@ a { color: inherit; text-decoration: none; }
 }
 @media (max-width: 980px) {
   .chart-grid { grid-template-columns: 1fr; }
+  /* 移动端：点状图在上，智能指数表在下；指数表限高内部滚动 */
+  .chart-scatter-col { order: 1; min-width: 0; }
+  .chart-card.bar-card { order: 2; max-height: 55vh; }
 }
 .chart-card {
   border: 1px solid var(--border);
@@ -224,6 +227,18 @@ a { color: inherit; text-decoration: none; }
   color: var(--text-faint);
   font-variant-numeric: tabular-nums;
 }
+.chart-rank.medal1 {
+  color: #f59e0b;
+  text-shadow: 0 0 6px rgba(245, 158, 11, 0.45);
+}
+.chart-rank.medal2 {
+  color: #94a3b8;
+  text-shadow: 0 0 6px rgba(148, 163, 184, 0.45);
+}
+.chart-rank.medal3 {
+  color: #b45309;
+  text-shadow: 0 0 6px rgba(180, 83, 9, 0.45);
+}
 .chart-name {
   flex: 1 1 55%;
   min-width: 0;
@@ -265,7 +280,7 @@ a { color: inherit; text-decoration: none; }
 
 /* 散点图 */
 .scatter-card { padding: 16px 16px 12px; }
-.scatter-svg { width: 100%; height: auto; display: block; cursor: grab; touch-action: none; user-select: none; }
+.scatter-svg { width: 100%; height: auto; display: block; cursor: grab; touch-action: pan-y; user-select: none; -webkit-tap-highlight-color: transparent; }
 .scatter-svg.dragging { cursor: grabbing; }
 .scatter-grid { stroke: rgba(148, 163, 218, 0.18); stroke-width: 1; }
 .scatter-grid-sub { stroke: rgba(148, 163, 218, 0.07); stroke-width: 1; }

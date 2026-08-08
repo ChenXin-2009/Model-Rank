@@ -57,7 +57,7 @@ export default function LeaderboardCharts({ models }: { models: TextModel[] }) {
           {rows.length === 0 && <div className="chart-empty">暂无数据</div>}
           {rows.map((r, i) => (
             <a key={r.model.id} className="chart-row" href={`/model/${r.model.slug}`}>
-              <span className="chart-rank">{i + 1}</span>
+              <span className={`chart-rank${i < 3 ? " medal" + (i + 1) : ""}`}>{i + 1}</span>
               <CreatorLogo slug={r.model.model_creator?.slug} size={24} />
               <span className="chart-name" title={r.model.name}>{r.model.name}</span>
               <span className="chart-bar">
@@ -70,7 +70,7 @@ export default function LeaderboardCharts({ models }: { models: TextModel[] }) {
         <p className="chart-unit">数值越大越好 · 可上下滚动查看更多</p>
       </section>
 
-      <div ref={rightRef}>
+      <div ref={rightRef} className="chart-scatter-col">
         <IndexCostScatter models={models} />
       </div>
     </div>
