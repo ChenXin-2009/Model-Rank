@@ -1,9 +1,11 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { TextModel } from "@/lib/types"
 import { EVAL_META, PRICE_COL_META } from "@/lib/constants"
 import { fmtDate, fmtNum, fmtPercent, fmtPrice, fmtSeconds, fmtSpeed } from "@/lib/format"
+import { useExchangeRate } from "@/lib/useExchangeRate"
+import { mergeStrongest } from "@/lib/modelFamily"
 import CreatorLogo from "@/components/CreatorLogo"
 
 const BATCH = 40
@@ -31,7 +33,7 @@ const colValue = (m: TextModel, key: string): number | null => {
   }
 }
 
-export default function TextTable({ models }: { models: TextModel[] }) {
+export default function TextTable({ models, initialRate }: { models: TextModel[]; initialRate: number }) {
   const [query, setQuery] = useState("")
   const [creator, setCreator] = useState("all")
   const [sort, setSort] = useState<SortState>({ key: "release_date", desc: true })
@@ -43,22 +45,28 @@ export default function TextTable({ models }: { models: TextModel[] }) {
   const [cny, setCny] = useState(true)
   const [count, setCount] = useState(BATCH)
   const [panelOpen, setPanelOpen] = useState(false)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const { rate, live } = useExchangeRate(initialRate)
+
+  /** 同一型号的多个等级变体只保留最强的一个 */
+  const mergedModels = useMemo(() => mergeStrongest(models), [models])
 
   const creators = useMemo(() => {
     const set = new Map<string, number>()
-    for (const m of models) {
+    for (const m of mergedModels) {
       const name = m.model_creator?.name ?? "Unknown"
       set.set(name, (set.get(name) ?? 0) + 1)
     }
     return [...set.entries()].sort((a, b) => b[1] - a[1])
-  }, [models])
+  }, [mergedModels])
 
   const visibleEvals = useMemo(() => EVAL_META.filter((e) => showEvals[e.key]), [showEvals])
   const visiblePrice = useMemo(() => PRICE_COL_META.filter((c) => (c.badge === "价格" ? showPrice : showSpeed)), [showPrice, showSpeed])
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase()
-    const list = models.filter((m) => {
+    const list = mergedModels.filter((m) => {
       if (creator !== "all" && (m.model_creator?.name ?? "Unknown") !== creator) return false
       if (!q) return true
       return (m.name + " " + (m.model_creator?.name ?? "")).toLowerCase().includes(q)
@@ -82,7 +90,27 @@ export default function TextTable({ models }: { models: TextModel[] }) {
       return diff
     })
     return list
-  }, [models, query, creator, sort])
+  }, [mergedModels, query, creator, sort])
+
+  const hasMore = count < rows.length
+
+  const loadMore = useCallback(() => {
+    setCount((c) => Math.min(c + BATCH, rows.length))
+  }, [rows.length])
+
+  useEffect(() => {
+    const el = sentinelRef.current
+    const root = wrapRef.current
+    if (!el || !root) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) loadMore()
+      },
+      { root, rootMargin: "200px" }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [hasMore, loadMore])
 
   const ranked = useMemo(() => {
     const { key, desc } = sort
@@ -98,11 +126,11 @@ export default function TextTable({ models }: { models: TextModel[] }) {
     const m: Record<string, number> = {}
     for (const key of [...EVAL_META.map((e) => e.key), ...PRICE_COL_META.map((c) => c.key)]) {
       let mx = 0
-      for (const model of models) mx = Math.max(mx, colValue(model, key) ?? 0)
+      for (const model of mergedModels) mx = Math.max(mx, colValue(model, key) ?? 0)
       m[key] = mx || 1
     }
     return m
-  }, [models])
+  }, [mergedModels])
 
   const toggleSort = (key: string) => {
     setSort((s) => (s.key === key ? { key, desc: !s.desc } : { key, desc: true }))
@@ -139,6 +167,9 @@ export default function TextTable({ models }: { models: TextModel[] }) {
           <button className={`btn ${cny ? "active" : ""}`} onClick={() => setCny(true)}>¥</button>
           <button className={`btn ${!cny ? "active" : ""}`} onClick={() => setCny(false)}>$</button>
         </div>
+        <span className={`rate-chip ${live ? "live" : ""}`} title={live ? "已实时刷新" : "快照汇率，实时刷新失败时使用"}>
+          1 USD = {rate.toFixed(2)} CNY{live ? " · 实时" : ""}
+        </span>
         <div style={{ position: "relative" }}>
           <button className="btn" onClick={() => setPanelOpen((v) => !v)}>⚙️ 自定义表头</button>
           {panelOpen && (
@@ -180,11 +211,11 @@ export default function TextTable({ models }: { models: TextModel[] }) {
       </div>
 
       <div className="note-strip">
-        <span>默认按发布日期倒序排序，点击任意列表头可切换排序</span>
+        <span>默认按发布日期倒序排序，点击任意列表头可切换排序 · 同一型号只保留最强等级</span>
         {sort.key !== "release_date" && <span><strong>当前排序：</strong>{EVAL_META.find((e) => e.key === sort.key)?.label ?? PRICE_COL_META.find((c) => c.key === sort.key)?.label ?? sort.key} {sort.desc ? "↓" : "↑"}</span>}
       </div>
 
-      <div className="table-wrap">
+      <div className="table-wrap" ref={wrapRef}>
         <table className="llm-table">
           <thead>
             <tr>
@@ -223,20 +254,20 @@ export default function TextTable({ models }: { models: TextModel[] }) {
                   )}
                   <td className="name-cell">
                     <span className="cell-logo">
-                      <CreatorLogo slug={m.model_creator?.slug} size={14} />
+                      <CreatorLogo slug={m.model_creator?.slug} size={16} />
                       <a href={`/model/${m.slug}`}>{m.name}</a>
                     </span>
                   </td>
                   <td className="creator-cell">
                     <span className="cell-logo">
-                      <CreatorLogo slug={m.model_creator?.slug} size={18} />
+                      <CreatorLogo slug={m.model_creator?.slug} size={26} />
                       <span>{m.model_creator?.name ?? "-"}</span>
                     </span>
                   </td>
                   <td className="date-cell">{fmtDate(m.release_date)}</td>
                   {showPrice && [
-                    <td key="pi" className="num-cell">{fmtPrice(m.pricing?.price_1m_input_tokens ?? null, cny)}</td>,
-                    <td key="po" className="num-cell">{fmtPrice(m.pricing?.price_1m_output_tokens ?? null, cny)}</td>,
+                    <td key="pi" className="num-cell">{fmtPrice(m.pricing?.price_1m_input_tokens ?? null, cny, rate)}</td>,
+                    <td key="po" className="num-cell">{fmtPrice(m.pricing?.price_1m_output_tokens ?? null, cny, rate)}</td>,
                   ]}
                   {showSpeed && [
                     <td key="sp" className="num-cell">{fmtSpeed(m.median_output_tokens_per_second)}</td>,
@@ -253,16 +284,10 @@ export default function TextTable({ models }: { models: TextModel[] }) {
             })}
           </tbody>
         </table>
+        {hasMore && <div ref={sentinelRef} className="load-sentinel" />}
         {!displayRows.length && <div className="empty-state">没有匹配的模型</div>}
       </div>
 
-      {rows.length > count && (
-        <div className="load-more">
-          <button className="btn" onClick={() => setCount((c) => c + BATCH)}>
-            加载更多（{rows.length - count} 剩余）
-          </button>
-        </div>
-      )}
       <p className="count-line">共显示 {displayRows.length} / {rows.length} 个模型 · 数据来源：Artificial Analysis 公开评测</p>
     </div>
   )

@@ -5,11 +5,14 @@ import type { ArenaCategory, ArenaModel, TextModel } from "@/lib/types"
 import { ARENA_TABS } from "@/lib/constants"
 import TextTable from "@/components/TextTable"
 import ArenaTable from "@/components/ArenaTable"
+import LeaderboardCharts from "@/components/LeaderboardCharts"
 
 export interface HomeData {
   models: TextModel[]
   arena: Partial<Record<ArenaCategory, ArenaModel[]>>
   date: string | null
+  /** 构建期快照汇率（客户端会实时刷新） */
+  rate: number
 }
 
 type TabKey = "text" | ArenaCategory
@@ -47,6 +50,8 @@ export default function HomeClient({ data }: { data: HomeData }) {
       </section>
 
       <main className="container">
+        <LeaderboardCharts models={data.models} />
+
         <div className="tabs" role="tablist">
           {available.map((t) => (
             <button
@@ -61,7 +66,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
           ))}
         </div>
 
-        {active === "text" && <TextTable models={data.models} />}
+        {active === "text" && <TextTable models={data.models} initialRate={data.rate} />}
         {active !== "text" && (
           <ArenaTable category={active} models={data.arena[active] ?? []} />
         )}

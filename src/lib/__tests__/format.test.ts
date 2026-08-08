@@ -21,6 +21,11 @@ describe("format", () => {
     expect(fmtPrice(null, false)).toBe("-")
   })
 
+  test("fmtPrice supports custom live rate", () => {
+    expect(fmtPrice(5, true, 6.76)).toBe("¥33.80")
+    expect(fmtPrice(5, true, 6.75)).toBe("¥33.75")
+  })
+
   test("fmtSpeed rounds and formats", () => {
     expect(fmtSpeed(206.824)).toBe("207")
     expect(fmtSpeed(null)).toBe("-")

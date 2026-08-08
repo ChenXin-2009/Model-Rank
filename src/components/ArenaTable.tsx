@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { ArenaCategory, ArenaModel } from "@/lib/types"
 import { ARENA_TABS } from "@/lib/constants"
 import { fmtDate, fmtNum } from "@/lib/format"
@@ -24,6 +24,8 @@ export default function ArenaTable({ category, models }: { category: ArenaCatego
   const [sortKey, setSortKey] = useState<SortKey>("rank")
   const [desc, setDesc] = useState(false)
   const [count, setCount] = useState(BATCH)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const sentinelRef = useRef<HTMLDivElement>(null)
   const meta = ARENA_TABS.find((t) => t.key === category)
 
   const rows = useMemo(() => {
@@ -49,6 +51,26 @@ export default function ArenaTable({ category, models }: { category: ArenaCatego
     })
     return list
   }, [models, query, sortKey, desc])
+
+  const hasMore = count < rows.length
+
+  const loadMore = useCallback(() => {
+    setCount((c) => Math.min(c + BATCH, rows.length))
+  }, [rows.length])
+
+  useEffect(() => {
+    const el = sentinelRef.current
+    const root = wrapRef.current
+    if (!el || !root) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) loadMore()
+      },
+      { root, rootMargin: "200px" }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [hasMore, loadMore])
 
   const toggle = (key: SortKey) => {
     if (key === sortKey) setDesc((d) => !d)
@@ -76,7 +98,7 @@ export default function ArenaTable({ category, models }: { category: ArenaCatego
         </div>
       </div>
 
-      <div className="table-wrap">
+      <div className="table-wrap" ref={wrapRef}>
         <table className="llm-table">
           <thead>
             <tr>
@@ -94,13 +116,13 @@ export default function ArenaTable({ category, models }: { category: ArenaCatego
                 <td className="num-cell">{m.rank ? fmtNum(m.rank, 0) : "—"}</td>
                 <td className="name-cell">
                   <span className="cell-logo">
-                    <CreatorLogo slug={m.model_creator?.slug} size={14} />
+                    <CreatorLogo slug={m.model_creator?.slug} size={16} />
                     <span>{m.name}</span>
                   </span>
                 </td>
                 <td className="creator-cell">
                   <span className="cell-logo">
-                    <CreatorLogo slug={m.model_creator?.slug} size={18} />
+                    <CreatorLogo slug={m.model_creator?.slug} size={26} />
                     <span>{m.model_creator?.name ?? "-"}</span>
                   </span>
                 </td>
@@ -111,13 +133,9 @@ export default function ArenaTable({ category, models }: { category: ArenaCatego
             ))}
           </tbody>
         </table>
+        {hasMore && <div ref={sentinelRef} className="load-sentinel" />}
         {!rows.slice(0, count).length && <div className="empty-state">没有匹配的模型</div>}
       </div>
-      {rows.length > count && (
-        <div className="load-more">
-          <button className="btn" onClick={() => setCount((c) => c + BATCH)}>加载更多（{rows.length - count} 剩余）</button>
-        </div>
-      )}
       <p className="count-line">共 {rows.length} 个模型 · 展示 {Math.min(count, rows.length)}</p>
     </div>
   )

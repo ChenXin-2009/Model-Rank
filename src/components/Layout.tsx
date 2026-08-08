@@ -1,3 +1,5 @@
+import type { ExchangeInfo } from "@/lib/types"
+
 export function Header({ date }: { date: string | null }) {
   return (
     <header className="site-header">
@@ -15,13 +17,16 @@ export function Header({ date }: { date: string | null }) {
   )
 }
 
-export function Footer() {
+export function Footer({ exchange }: { exchange: ExchangeInfo }) {
+  const updated = exchange.updated ? exchange.updated.replace("T", " ").slice(0, 16) : null
   return (
     <footer className="site-footer">
       <div className="container">
         <div>
           <p>数据来源：<a href="https://artificialanalysis.ai" target="_blank" rel="noreferrer">Artificial Analysis</a> 公开评测 · 竞技场数据每日同步</p>
-          <p style={{ marginTop: 4 }}>价格展示汇率：1 USD = 7.2 CNY（仅展示换算，非交易汇率）</p>
+          <p style={{ marginTop: 4 }}>
+            实时汇率（{exchange.source}）：1 USD = {exchange.rate} CNY{updated ? `（${updated}）` : ""} · 仅展示换算，非交易汇率
+          </p>
         </div>
         <div className="footer-links">
           <a href="https://artificialanalysis.ai" target="_blank" rel="noreferrer">Artificial Analysis ↗</a>

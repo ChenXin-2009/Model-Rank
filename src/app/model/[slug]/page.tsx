@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { findModelBySlug, getAllModelSlugs } from "@/lib/data"
-import { EVAL_META, USD_TO_CNY } from "@/lib/constants"
+import { getExchangeInfo } from "@/lib/exchange"
+import { EVAL_META } from "@/lib/constants"
 import { fmtDate, fmtNum, fmtPercent, fmtPrice, fmtSeconds, fmtSpeed } from "@/lib/format"
 import { Header, Footer } from "@/components/Layout"
 import CreatorLogo from "@/components/CreatorLogo"
@@ -26,6 +27,7 @@ export default function ModelPage({ params }: { params: { slug: string } }) {
   const found = findModelBySlug(params.slug)
   if (!found) notFound()
   const { model } = found
+  const exchange = getExchangeInfo()
 
   const creator = model.model_creator?.name ?? "未知供应商"
   const ii = model.evaluations?.artificial_analysis_intelligence_index ?? null
@@ -42,21 +44,21 @@ export default function ModelPage({ params }: { params: { slug: string } }) {
           <h1>{model.name}</h1>
           <div className="byline">
             <span className="creator-pill">
-              <CreatorLogo slug={model.model_creator?.slug} size={20} />
+              <CreatorLogo slug={model.model_creator?.slug} size={24} />
               {creator}
             </span>
             <span>发布：{fmtDate(model.release_date)}</span>
-            {ii !== null && <span>Intelligence Index：<strong>{fmtNum(ii)}</strong></span>}
+            {ii !== null && <span>智能指数：<strong>{fmtNum(ii)}</strong></span>}
           </div>
         </section>
 
         <div className="cards">
           <div className="card">
             <h3>价格（每百万 tokens）</h3>
-            <div className="metric-row"><span className="k">输入</span><span className="v">{fmtPrice(model.pricing?.price_1m_input_tokens ?? null, false)}（{fmtPrice(model.pricing?.price_1m_input_tokens ?? null, true)}）</span></div>
-            <div className="metric-row"><span className="k">输出</span><span className="v">{fmtPrice(model.pricing?.price_1m_output_tokens ?? null, false)}（{fmtPrice(model.pricing?.price_1m_output_tokens ?? null, true)}）</span></div>
+            <div className="metric-row"><span className="k">输入</span><span className="v">{fmtPrice(model.pricing?.price_1m_input_tokens ?? null, false)}（{fmtPrice(model.pricing?.price_1m_input_tokens ?? null, true, exchange.rate)}）</span></div>
+            <div className="metric-row"><span className="k">输出</span><span className="v">{fmtPrice(model.pricing?.price_1m_output_tokens ?? null, false)}（{fmtPrice(model.pricing?.price_1m_output_tokens ?? null, true, exchange.rate)}）</span></div>
             <div className="metric-row"><span className="k">混合（3:1）</span><span className="v">{fmtPrice(model.pricing?.price_1m_blended_3_to_1 ?? null, false)}</span></div>
-            <p style={{ color: "var(--text-faint)", fontSize: 12, marginTop: 8 }}>汇率 1 USD = {USD_TO_CNY} CNY</p>
+            <p style={{ color: "var(--text-faint)", fontSize: 12, marginTop: 8 }}>汇率 1 USD = {exchange.rate} CNY（{exchange.source}{exchange.updated ? `，${exchange.updated.replace("T", " ").slice(0, 16)}` : ""}，每日同步）</p>
           </div>
 
           <div className="card">
@@ -110,7 +112,7 @@ export default function ModelPage({ params }: { params: { slug: string } }) {
           </div>
         </div>
       </main>
-      <Footer />
+      <Footer exchange={exchange} />
     </>
   )
 }

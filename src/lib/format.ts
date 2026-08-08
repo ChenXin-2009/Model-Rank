@@ -17,9 +17,9 @@ export function fmtPercent(v: number | null | undefined, digits = 1): string {
 }
 
 /** 价格：美元原值，人民币按汇率换算 */
-export function fmtPrice(v: number | null | undefined, cny = false, digits = 2): string {
+export function fmtPrice(v: number | null | undefined, cny = false, rate = USD_TO_CNY, digits = 2): string {
   if (!hasValue(v)) return "-"
-  const n = cny ? v * USD_TO_CNY : v
+  const n = cny ? v * rate : v
   return `${cny ? "¥" : "$"}${n.toFixed(digits)}`
 }
 

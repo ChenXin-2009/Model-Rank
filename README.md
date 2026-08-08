@@ -24,7 +24,7 @@ npm test           # 运行测试
 
 - 数据文件：`data/snapshot/*.json`，由 `scripts/fetch-data.mjs` 从阿里云 OSS 每日快照拉取
 - 文本榜数据来自 **Artificial Analysis** 公开评测；图文音视频榜为 **LMArena** 竞技场 Elo 数据
-- 价格展示按 1 USD = 7.2 CNY 换算（仅展示口径）
+- 汇率：`data/snapshot/exchange.json` 每日由 `scripts/fetch-data.mjs` 从公开实时汇率接口拉取（主源 open.er-api.com，兜底 exchangerate-api.com），站点运行时再在浏览器端实时刷新；接口不可用时回退历史值/默认 7.2
 - 推送后 GitHub Actions `refresh.yml` 每日 08:10（UTC+8）自动拉取最新数据并 commit，触发 Vercel 自动重新部署
 - 手动刷新：`node scripts/fetch-data.mjs` 或 `npm run refresh`
 

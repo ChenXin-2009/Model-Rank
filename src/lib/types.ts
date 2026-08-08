@@ -63,6 +63,16 @@ export interface SnapshotMeta {
   files: Record<string, number>
 }
 
+/** 汇率快照（data/snapshot/exchange.json） */
+export interface ExchangeInfo {
+  /** 1 USD 兑换 CNY */
+  rate: number
+  /** 汇率更新时间（ISO 字符串或 yyyy-mm-dd） */
+  updated: string | null
+  /** 数据源标识 */
+  source: string
+}
+
 /** 竞技场分类 key -> 数据文件名 */
 export type ArenaCategory = "text-to-image" | "text-to-video" | "image-to-video" | "text-to-speech"
 

@@ -29,7 +29,7 @@ export interface EvalMeta {
 export const EVAL_META: EvalMeta[] = [
   {
     key: "artificial_analysis_intelligence_index",
-    label: "Intelligence Index",
+    label: "智能指数",
     badge: "综合",
     percent: false,
     higherBetter: true,
@@ -39,7 +39,7 @@ export const EVAL_META: EvalMeta[] = [
   },
   {
     key: "artificial_analysis_coding_index",
-    label: "Coding Index",
+    label: "代码指数",
     badge: "代码",
     percent: false,
     higherBetter: true,
@@ -49,7 +49,7 @@ export const EVAL_META: EvalMeta[] = [
   },
   {
     key: "artificial_analysis_math_index",
-    label: "Math Index",
+    label: "数学指数",
     badge: "数学",
     percent: false,
     higherBetter: true,

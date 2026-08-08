@@ -35,7 +35,35 @@ async function fetchJson(url, timeoutMs = 30000) {
   }
 }
 
-async function main() {
+// 实时汇率快照：open.er-api.com 为主，exchangerate-api.com 兜底，再失败则保留旧值/默认 7.2
+const EXCHANGE_SOURCES = [
+  { name: "open.er-api.com", url: "https://open.er-api.com/v6/latest/USD", pick: (j) => ({ rate: j?.rates?.CNY, updated: j?.time_last_update_utc }) },
+  { name: "exchangerate-api.com", url: "https://api.exchangerate-api.com/v4/latest/USD", pick: (j) => ({ rate: j?.rates?.CNY, updated: j?.date }) },
+]
+
+async function fetchExchangeRate() {
+  const old = existsSync(join(DATA_DIR, "exchange.json"))
+    ? JSON.parse(readFileSync(join(DATA_DIR, "exchange.json"), "utf-8"))
+    : null
+  for (const src of EXCHANGE_SOURCES) {
+    try {
+      const json = await fetchJson(src.url, 10000)
+      const { rate, updated } = src.pick(json)
+      if (typeof rate === "number" && rate > 0) {
+        return { rate: Number(rate.toFixed(4)), updated: updated ?? null, source: src.name }
+      }
+    } catch (e) {
+      console.log(`[fetch] exchange ${src.name} FAILED: ${e.message}`)
+    }
+  }
+  if (old && typeof old.rate === "number") {
+    console.log(`[fetch] exchange keep previous rate ${old.rate}`)
+    return { ...old, source: `${old.source} (stale)` }
+  }
+  return { rate: 7.2, updated: null, source: "default" }
+}
+
+async function fetchSnapshot() {
   mkdirSync(DATA_DIR, { recursive: true })
   let date = fallbackArgs()
   if (!date) {
@@ -71,6 +99,14 @@ async function main() {
   console.log(`[fetch] done, meta: ${JSON.stringify(summary)}`)
   // 无数据时退出码非 0，方便 CI 判断
   if (!Object.keys(summary.files).length) process.exit(1)
+}
+
+async function main() {
+  mkdirSync(DATA_DIR, { recursive: true })
+  const exchange = await fetchExchangeRate()
+  writeFileSync(join(DATA_DIR, "exchange.json"), JSON.stringify(exchange, null, 2))
+  console.log(`[fetch] exchange 1 USD = ${exchange.rate} CNY (${exchange.source}, ${exchange.updated ?? "n/a"})`)
+  await fetchSnapshot()
 }
 
 main().catch((e) => { console.error("[fetch] fatal:", e); process.exit(1) })
