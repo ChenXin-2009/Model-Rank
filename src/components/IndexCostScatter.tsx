@@ -19,14 +19,12 @@ interface View {
   yMax: number
 }
 
-const W = 760
 const L = 46
 const R = 18
 const T = 16
 const B = 34
-const IW = W - L - R
 
-const LOGO = 16
+const LOGO = 18
 const RECENT_DAYS = 180
 const MAX_POINTS = 80
 const MIN_X_RANGE = 0.25
@@ -138,13 +136,15 @@ function clipToBand(
 export default function IndexCostScatter({ models }: { models: TextModel[] }) {
   const pts = useMemo(() => selectModels(models), [models])
 
-  /** 手机竖屏时图更高（H 动态，横屏/桌面保持 470），方便双指操作 */
-  const [tall, setTall] = useState(false)
-  const H = tall ? 640 : 470
+  /** 手机竖屏：收窄 viewBox（540 宽）让图标/文字渲染得更大，并加高（H=640）；横屏/桌面保持 760×470 */
+  const [mobilePortrait, setMobilePortrait] = useState(false)
+  const W = mobilePortrait ? 540 : 760
+  const IW = W - L - R
+  const H = mobilePortrait ? 640 : 470
   const IH = H - T - B
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 900px) and (orientation: portrait)")
-    const apply = () => setTall(mq.matches)
+    const apply = () => setMobilePortrait(mq.matches)
     apply()
     mq.addEventListener?.("change", apply)
     return () => mq.removeEventListener?.("change", apply)
@@ -397,9 +397,9 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
         <h2>智能指数 vs 价格</h2>
         <span className="chart-badge">性价比</span>
         <div className="zoom-ctrl">
-          <button type="button" className="zoom-btn" aria-label="缩小" title="缩小" onClick={() => zoomBy(1 / 1.3)}>−</button>
+          <button type="button" className="zoom-btn" aria-label="缩小" title="缩小" onClick={() => zoomBy(1.3)}>−</button>
           <span className="zoom-badge">缩放 {zoomPct}%</span>
-          <button type="button" className="zoom-btn" aria-label="放大" title="放大" onClick={() => zoomBy(1.3)}>+</button>
+          <button type="button" className="zoom-btn" aria-label="放大" title="放大" onClick={() => zoomBy(1 / 1.3)}>+</button>
         </div>
         <button className="btn btn-sm" onClick={resetView}>↺ 重置视图</button>
       </div>

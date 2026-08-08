@@ -284,9 +284,9 @@ a { color: inherit; text-decoration: none; }
 .scatter-svg.dragging { cursor: grabbing; }
 .scatter-grid { stroke: rgba(148, 163, 218, 0.18); stroke-width: 1; }
 .scatter-grid-sub { stroke: rgba(148, 163, 218, 0.07); stroke-width: 1; }
-.scatter-tick { fill: var(--text-faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+.scatter-tick { fill: var(--text-faint); font-size: 12px; font-variant-numeric: tabular-nums; }
 .scatter-fit { stroke: #f43f5e; stroke-width: 1.6; stroke-dasharray: 7 5; opacity: 0.9; pointer-events: none; }
-.scatter-axis { fill: var(--text-dim); font-size: 11.5px; }
+.scatter-axis { fill: var(--text-dim); font-size: 12px; }
 .scatter-logo-link { cursor: pointer; }
 .scatter-logo {
   transform-box: fill-box;
@@ -297,7 +297,7 @@ a { color: inherit; text-decoration: none; }
 .scatter-logo-link:hover circle { stroke: #fff; stroke-width: 1.6; }
 .scatter-label {
   fill: var(--text-dim);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   pointer-events: none;
 }
@@ -747,7 +747,6 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- Footer ---------- */
 .site-footer {
-  margin-top: 48px;
   border-top: 1px solid var(--border);
   padding: 26px 0 40px;
   color: var(--text-faint);
@@ -756,7 +755,31 @@ a { color: inherit; text-decoration: none; }
 .site-footer .container { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .site-footer a { color: var(--text-dim); }
 .site-footer a:hover { color: #a78bfa; text-decoration: underline; text-underline-offset: 3px; }
-.footer-links { display: flex; gap: 14px; flex-wrap: wrap; }
+.footer-links { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+
+/* 底部居中的项目 logo + 开源链接（位于底栏上方） */
+.footer-project {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 48px;
+  padding: 0 0 30px;
+  text-align: center;
+}
+.footer-logo {
+  height: 138px;
+  width: auto;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.footer-project a:hover .footer-logo { opacity: 1; }
+.footer-project-link {
+  font-size: 13px;
+  color: var(--text-faint);
+  text-decoration: none;
+}
+.footer-project-link:hover { color: #a78bfa; text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---------- 空态 ---------- */
 .empty-state {
