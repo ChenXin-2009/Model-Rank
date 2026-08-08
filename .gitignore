@@ -9,3 +9,5 @@ next-env.d.ts
 .playwright-mcp/
 start.log
 temp_status.txt
+dev-start.log
+dev-start.err.log
