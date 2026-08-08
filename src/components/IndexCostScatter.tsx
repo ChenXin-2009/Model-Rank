@@ -29,7 +29,6 @@ const IW = W - L - R
 const LOGO = 16
 const RECENT_DAYS = 180
 const MAX_POINTS = 80
-const LEGEND_MAX = 8
 const MIN_X_RANGE = 0.25
 const MIN_Y_RANGE = 5
 const Y_FULL_MIN = 0
@@ -207,9 +206,7 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
   const dragRef = useRef<{ sx: number; sy: number; view: View; moved: boolean } | null>(null)
   const viewRef = useRef<View | null>(view)
   const animRef = useRef<number | null>(null)
-  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map())
-  const pinchRef = useRef<{ dist: number; view: View } | null>(null)
-  /** 本次手势是否发生过位移（拖动/捏合），用于手势结束后拦截误点击跳转 */
+  /** 本次手势是否发生过位移（拖动），用于手势结束后拦截误点击跳转 */
   const movedRef = useRef(false)
 
   /** 带缓动的视图迁移（easeOutCubic，260ms），缩放/重置都走这里 */
@@ -293,57 +290,12 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
     const v = viewRef.current
     if (!v) return
     if (animRef.current) cancelAnimationFrame(animRef.current)
-    // 每根手指都捕获到 SVG 根元素：捕获到子元素（<a>/<image>/<text>）在 iOS 上不可靠，
-    // 会导致第二根手指的 down/move 丢失，双指捏合退化为单指拖动
-    try { svgRef.current?.setPointerCapture?.(e.pointerId) } catch { /* 老浏览器容错 */ }
-    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    ;(e.target as Element).setPointerCapture?.(e.pointerId)
+    dragRef.current = { sx: e.clientX, sy: e.clientY, view: v, moved: false }
     movedRef.current = false
-    if (pointersRef.current.size === 2) {
-      const [a, b] = [...pointersRef.current.values()]
-      const dist = Math.hypot(b.x - a.x, b.y - a.y)
-      pinchRef.current = { dist: Math.max(dist, 1), view: v }
-      dragRef.current = null
-      setDragging(false)
-      return
-    }
-    if (pointersRef.current.size === 1) {
-      dragRef.current = { sx: e.clientX, sy: e.clientY, view: v, moved: false }
-      setDragging(true)
-    }
+    setDragging(true)
   }
   const onPointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
-    const pt = pointersRef.current.get(e.pointerId)
-    if (!pt) return
-    pt.x = e.clientX
-    pt.y = e.clientY
-    if (pointersRef.current.size >= 2) {
-      // pinch 基线缺失时自愈重建（事件乱序/部分丢失时兜底），避免退化为拖动
-      if (!pinchRef.current) {
-        const v = viewRef.current
-        if (!v) return
-        const [a, b] = [...pointersRef.current.values()]
-        const dist = Math.hypot(b.x - a.x, b.y - a.y)
-        pinchRef.current = { dist: Math.max(dist, 1), view: v }
-        dragRef.current = null
-        setDragging(false)
-      }
-      const pinch = pinchRef.current
-      if (pinch && full && svgRef.current) {
-        movedRef.current = true
-        const [a, b] = [...pointersRef.current.values()]
-        const dist = Math.max(Math.hypot(b.x - a.x, b.y - a.y), 1)
-        const factor = dist / pinch.dist
-        pinch.dist = dist
-        const rect = svgRef.current.getBoundingClientRect()
-        const s = W / rect.width
-        const mx = ((a.x + b.x) / 2 - rect.left) * s
-        const my = ((a.y + b.y) / 2 - rect.top) * s
-        const nv = zoomAt(mx, my, factor, pinch.view, full)
-        viewRef.current = nv
-        setView(nv)
-      }
-      return
-    }
     const drag = dragRef.current
     if (!drag || !full) return
     if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 3) {
@@ -366,28 +318,19 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
     if (yMin + yRange < Y_FULL_MIN) yMin = Y_FULL_MIN - yRange
     setView({ lxMin, lxMax: lxMin + xRange, yMin, yMax: yMin + yRange })
   }
-  const onPointerUp = (e: React.PointerEvent<SVGSVGElement>) => {
-    pointersRef.current.delete(e.pointerId)
-    try { svgRef.current?.releasePointerCapture?.(e.pointerId) } catch { /* noop */ }
-    if (pointersRef.current.size < 2) pinchRef.current = null
-    if (pointersRef.current.size === 1) {
-      // 双指 → 单指降级：用剩余手指当前位置重建拖动起点，手势不断档
-      const [rest] = [...pointersRef.current.values()]
-      const v = viewRef.current
-      if (v) {
-        dragRef.current = { sx: rest.x, sy: rest.y, view: v, moved: true }
-        setDragging(true)
-      }
-      return
-    }
-    if (pointersRef.current.size === 0) {
-      dragRef.current = null
-      setDragging(false)
-    }
+  const onPointerUp = () => {
+    dragRef.current = null
+    setDragging(false)
   }
   const resetView = () => {
     if (!defaultView) return
     animateTo(defaultView)
+  }
+  /** 以屏幕中心等比缩放一步（与滚轮同系数 1.3），带缓动 */
+  const zoomBy = (factor: number) => {
+    const v = viewRef.current
+    if (!v || !full) return
+    animateTo(zoomAt(L + IW / 2, T + IH / 2, factor, v, full))
   }
 
   if (!full || !view || !pts.length) {
@@ -438,27 +381,29 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
     else ySubTicks.push(v)
   }
 
-  const byCreator = new Map<string, Pt[]>()
-  for (const p of pts) {
-    const slug = p.m.model_creator?.slug ?? "?"
-    const arr = byCreator.get(slug) ?? []
-    arr.push(p)
-    byCreator.set(slug, arr)
-  }
-  const legend = [...byCreator.entries()]
-    .sort((a, b) => b[1].length - a[1].length)
-    .slice(0, LEGEND_MAX)
-  const legendSlugs = new Set(legend.map(([s]) => s))
-  const otherCount = pts.filter((p) => !legendSlugs.has(p.m.model_creator?.slug ?? "?")).length
+  /** 缩放百分比：当前视野相对全局视野的比例。等比缩放两轴系数始终一致，用几何平均避免单轴失真 */
+  const zoomPct = full
+    ? Math.round(
+        Math.sqrt(
+          ((Math.log10(full.xMax) - Math.log10(full.xMin)) / (view.lxMax - view.lxMin)) *
+            ((Y_FULL_MAX - Y_FULL_MIN) / (view.yMax - view.yMin))
+        ) * 100
+      )
+    : 100
 
   return (
     <section className="chart-card scatter-card">
       <div className="chart-head">
         <h2>智能指数 vs 价格</h2>
         <span className="chart-badge">性价比</span>
+        <div className="zoom-ctrl">
+          <button type="button" className="zoom-btn" aria-label="缩小" title="缩小" onClick={() => zoomBy(1 / 1.3)}>−</button>
+          <span className="zoom-badge">缩放 {zoomPct}%</span>
+          <button type="button" className="zoom-btn" aria-label="放大" title="放大" onClick={() => zoomBy(1.3)}>+</button>
+        </div>
         <button className="btn btn-sm" onClick={resetView}>↺ 重置视图</button>
       </div>
-      <p className="chart-desc">横轴：综合价格（$/1M，对数坐标）· 纵轴：智能指数 · 滚轮/双指捏合以屏幕中心等比缩放（带缓动）</p>
+      <p className="chart-desc">横轴：综合价格（$/1M，对数坐标）· 纵轴：智能指数 · 滚轮以屏幕中心等比缩放（带缓动）</p>
 
       <svg
         viewBox={`0 0 ${W} ${H}`}
@@ -544,28 +489,7 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
         })}
       </svg>
 
-      <div className="scatter-legend">
-        {legend.map(([slug, arr]) => (
-          <span key={slug} className="scatter-legend-item">
-            <i style={{ background: creatorColor(slug) }} />
-            {arr[0].m.model_creator?.name ?? slug} ({arr.length})
-          </span>
-        ))}
-        {otherCount > 0 && (
-          <span className="scatter-legend-item">
-            <i style={{ background: "hsl(0 0% 55%)" }} />
-            其他 ({otherCount})
-          </span>
-        )}
-        {fit && (
-          <span className="scatter-legend-item">
-            <i className="scatter-fit-swatch" />
-            趋势线（R² {fit.r2.toFixed(2)}）
-          </span>
-        )}
-      </div>
-
-      <p className="chart-unit">悬停查看详情，点击跳转模型页 · 手机双指捏合缩放、单指拖动平移，桌面滚轮缩放 · 虚线为线性拟合趋势线</p>
+      <p className="chart-unit">悬停查看详情，点击跳转模型页 · 滚轮缩放、拖动平移 · 虚线为线性拟合趋势线</p>
     </section>
   )
 }
