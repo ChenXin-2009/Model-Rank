@@ -6,3 +6,5 @@ coverage/
 next-env.d.ts
 .DS_Store
 .playwright-mcp/
+start.log
+temp_status.txt
