@@ -280,11 +280,13 @@ a { color: inherit; text-decoration: none; }
 
 /* 散点图 */
 .scatter-card { padding: 16px 16px 12px; }
-.scatter-svg { width: 100%; height: auto; display: block; cursor: grab; touch-action: pan-y; user-select: none; -webkit-tap-highlight-color: transparent; }
+.scatter-svg { width: 100%; height: auto; display: block; cursor: grab; touch-action: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 .scatter-svg.dragging { cursor: grabbing; }
 .scatter-grid { stroke: rgba(148, 163, 218, 0.18); stroke-width: 1; }
 .scatter-grid-sub { stroke: rgba(148, 163, 218, 0.07); stroke-width: 1; }
 .scatter-tick { fill: var(--text-faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+.scatter-fit { stroke: #f43f5e; stroke-width: 1.6; stroke-dasharray: 7 5; opacity: 0.9; pointer-events: none; }
+.scatter-fit-swatch { background: #f43f5e; }
 .scatter-axis { fill: var(--text-dim); font-size: 11.5px; }
 .scatter-logo-link { cursor: pointer; }
 .scatter-logo {

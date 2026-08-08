@@ -20,13 +20,11 @@ interface View {
 }
 
 const W = 760
-const H = 470
 const L = 46
 const R = 18
 const T = 16
 const B = 34
 const IW = W - L - R
-const IH = H - T - B
 
 const LOGO = 16
 const RECENT_DAYS = 180
@@ -120,8 +118,38 @@ function fmtTick(v: number): string {
   return String(+v.toPrecision(2))
 }
 
+/** 线段裁剪到 [lo, hi] 水平带内（散点图只有 y 方向会越界），返回裁剪后的端点 */
+function clipToBand(
+  x1: number, y1: number, x2: number, y2: number, lo: number, hi: number
+): [number, number, number, number] | null {
+  if (y1 < lo && y2 < lo) return null
+  if (y1 > hi && y2 > hi) return null
+  const dx = x2 - x1
+  const dy = y2 - y1
+  if (dy === 0) return [x1, y1, x2, y2]
+  let t0: number, t1: number
+  if (dy > 0) { t0 = (lo - y1) / dy; t1 = (hi - y1) / dy }
+  else { t0 = (hi - y1) / dy; t1 = (lo - y1) / dy }
+  t0 = Math.max(0, t0)
+  t1 = Math.min(1, t1)
+  if (t0 > t1) return null
+  return [x1 + t0 * dx, y1 + t0 * dy, x1 + t1 * dx, y1 + t1 * dy]
+}
+
 export default function IndexCostScatter({ models }: { models: TextModel[] }) {
   const pts = useMemo(() => selectModels(models), [models])
+
+  /** 手机竖屏时图更高（H 动态，横屏/桌面保持 470），方便双指操作 */
+  const [tall, setTall] = useState(false)
+  const H = tall ? 640 : 470
+  const IH = H - T - B
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 900px) and (orientation: portrait)")
+    const apply = () => setTall(mq.matches)
+    apply()
+    mq.addEventListener?.("change", apply)
+    return () => mq.removeEventListener?.("change", apply)
+  }, [])
 
   const full = useMemo(() => {
     const xs = pts.map((p) => p.x).sort((a, b) => a - b)
@@ -132,14 +160,48 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
     }
   }, [pts])
 
-  const fullView = (fullX: { xMin: number; xMax: number }): View => ({
-    lxMin: Math.log10(fullX.xMin),
-    lxMax: Math.log10(fullX.xMax),
-    yMin: Y_FULL_MIN,
-    yMax: Y_FULL_MAX,
-  })
+  /** 默认视图：贴合数据分布（比全局 0~100 视野更聚焦，点更大），缩放上限仍可回到全局 */
+  const defaultView = useMemo<View | null>(() => {
+    if (!pts.length) return null
+    const xs = pts.map((p) => p.x)
+    const ys = pts.map((p) => p.y)
+    const xLo = Math.pow(10, Math.floor(Math.log10(Math.min(...xs))))
+    const xHi = Math.pow(10, Math.ceil(Math.log10(Math.max(...xs))))
+    const yMin = Math.max(0, Math.floor(Math.min(...ys) - 2))
+    const yMax = Math.min(Y_FULL_MAX, Math.ceil(Math.max(...ys) + 2))
+    return {
+      lxMin: Math.log10(xLo),
+      lxMax: Math.log10(xHi),
+      yMin,
+      yMax: Math.max(yMin + MIN_Y_RANGE, yMax),
+    }
+  }, [pts])
 
-  const [view, setView] = useState<View | null>(() => (full ? fullView(full) : null))
+  /** 一次线性拟合（对 log10 价格做最小二乘）：y = m·log10(x) + b，用于显示散点趋势 */
+  const fit = useMemo(() => {
+    if (pts.length < 2) return null
+    let sx = 0, sy = 0, sxx = 0, sxy = 0
+    for (const p of pts) {
+      const lx = Math.log10(p.x)
+      sx += lx; sy += p.y; sxx += lx * lx; sxy += lx * p.y
+    }
+    const n = pts.length
+    const denom = n * sxx - sx * sx
+    if (denom === 0) return null
+    const m = (n * sxy - sx * sy) / denom
+    const b = (sy - m * sx) / n
+    const meanY = sy / n
+    let sst = 0, ssr = 0
+    for (const p of pts) {
+      const lx = Math.log10(p.x)
+      const e = p.y - (m * lx + b)
+      sst += (p.y - meanY) ** 2
+      ssr += e * e
+    }
+    return { m, b, r2: sst > 0 ? 1 - ssr / sst : 0 }
+  }, [pts])
+
+  const [view, setView] = useState<View | null>(() => defaultView)
   const [dragging, setDragging] = useState(false)
   const svgRef = useRef<SVGSVGElement>(null)
   const dragRef = useRef<{ sx: number; sy: number; view: View; moved: boolean } | null>(null)
@@ -292,8 +354,8 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
     }
   }
   const resetView = () => {
-    if (!full) return
-    animateTo(fullView(full))
+    if (!defaultView) return
+    animateTo(defaultView)
   }
 
   if (!full || !view || !pts.length) {
@@ -399,6 +461,16 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
         <text x={L + IW / 2} y={H - 1} className="scatter-axis" textAnchor="middle">综合价格（美元/百万 tokens，对数刻度）</text>
         <text x={14} y={T + IH / 2} className="scatter-axis" textAnchor="middle" transform={`rotate(-90 14 ${T + IH / 2})`}>智能指数评分</text>
 
+        {fit && (() => {
+          const y1 = fit.m * view.lxMin + fit.b
+          const y2 = fit.m * view.lxMax + fit.b
+          const seg = clipToBand(L, py(y1), L + IW, py(y2), T, T + IH)
+          if (!seg) return null
+          return (
+            <line x1={seg[0]} y1={seg[1]} x2={seg[2]} y2={seg[3]} className="scatter-fit" />
+          )
+        })()}
+
         {visible.map((p) => {
           const cx = px(p.x)
           const cy = py(p.y)
@@ -450,9 +522,15 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
             其他 ({otherCount})
           </span>
         )}
+        {fit && (
+          <span className="scatter-legend-item">
+            <i className="scatter-fit-swatch" />
+            趋势线（R² {fit.r2.toFixed(2)}）
+          </span>
+        )}
       </div>
 
-      <p className="chart-unit">悬停查看详情，点击跳转模型页 · 滚轮/双指等比缩放、拖动平移 · 名称始终显示</p>
+      <p className="chart-unit">悬停查看详情，点击跳转模型页 · 手机双指捏合缩放、单指拖动平移，桌面滚轮缩放 · 虚线为线性拟合趋势线</p>
     </section>
   )
 }
