@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return {
     title: `${model.name} - 模型详情`,
     description: `${model.name}（${model.model_creator?.name ?? "未知供应商"}）的评测、价格与速度数据。`,
+    alternates: { canonical: `/model/${params.slug}` },
   }
 }
 

@@ -6,6 +6,7 @@ import { Header, Footer } from "@/components/Layout"
 export const metadata: Metadata = {
   title: "评测指标说明 - Model Rank",
   description: "大模型评测基准说明：智能指数、MMLU Pro、GPQA、HLE、LiveCodeBench 等指标含义与数据来源。",
+  alternates: { canonical: "/evaluations" },
 }
 
 export default function EvaluationsPage() {
