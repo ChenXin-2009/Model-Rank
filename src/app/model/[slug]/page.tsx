@@ -4,6 +4,7 @@ import { findModelBySlug, getAllModelSlugs } from "@/lib/data"
 import { EVAL_META, USD_TO_CNY } from "@/lib/constants"
 import { fmtDate, fmtNum, fmtPercent, fmtPrice, fmtSeconds, fmtSpeed } from "@/lib/format"
 import { Header, Footer } from "@/components/Layout"
+import CreatorLogo from "@/components/CreatorLogo"
 
 export const dynamicParams = false
 
@@ -40,7 +41,10 @@ export default function ModelPage({ params }: { params: { slug: string } }) {
         <section className="model-hero">
           <h1>{model.name}</h1>
           <div className="byline">
-            <span className="creator-pill">🏢 {creator}</span>
+            <span className="creator-pill">
+              <CreatorLogo slug={model.model_creator?.slug} size={20} />
+              {creator}
+            </span>
             <span>发布：{fmtDate(model.release_date)}</span>
             {ii !== null && <span>Intelligence Index：<strong>{fmtNum(ii)}</strong></span>}
           </div>

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import type { ArenaCategory, ArenaModel } from "@/lib/types"
 import { ARENA_TABS } from "@/lib/constants"
 import { fmtDate, fmtNum } from "@/lib/format"
+import CreatorLogo from "@/components/CreatorLogo"
 
 const BATCH = 60
 
@@ -91,8 +92,18 @@ export default function ArenaTable({ category, models }: { category: ArenaCatego
             {rows.slice(0, count).map((m) => (
               <tr key={m.id}>
                 <td className="num-cell">{m.rank ? fmtNum(m.rank, 0) : "—"}</td>
-                <td className="name-cell">{m.name}</td>
-                <td className="creator-cell">{m.model_creator?.name ?? "-"}</td>
+                <td className="name-cell">
+                  <span className="cell-logo">
+                    <CreatorLogo slug={m.model_creator?.slug} size={14} />
+                    <span>{m.name}</span>
+                  </span>
+                </td>
+                <td className="creator-cell">
+                  <span className="cell-logo">
+                    <CreatorLogo slug={m.model_creator?.slug} size={18} />
+                    <span>{m.model_creator?.name ?? "-"}</span>
+                  </span>
+                </td>
                 <td className="el-cell"><EloBadge elo={m.elo} /></td>
                 <td className="num-cell">{fmtNum(m.appearances ?? null, 0)}</td>
                 <td className="date-cell">{fmtDate(m.release_date)}</td>

@@ -20,14 +20,15 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node scripts/fetch-data.mjs
+      - run: node scripts/sync-logos.mjs
       - name: Commit data changes
         run: |
           git config user.name "model-rank-bot"
           git config user.email "model-rank-bot@users.noreply.github.com"
-          if git diff --quiet data/ && git diff --cached --quiet data/; then
+          if git diff --quiet data/ && git diff --cached --quiet data/ && git diff --quiet public/ src/lib/logos.ts && git diff --cached --quiet public/ src/lib/logos.ts; then
             echo "no data changes"
           else
-            git add data/
+            git add data/ public/ src/lib/logos.ts
             git commit -m "chore(data): refresh snapshot $(node -p "require('./data/snapshot/meta.json').date")"
             git push
           fi

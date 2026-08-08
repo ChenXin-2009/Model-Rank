@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import type { TextModel } from "@/lib/types"
 import { EVAL_META, PRICE_COL_META } from "@/lib/constants"
 import { fmtDate, fmtNum, fmtPercent, fmtPrice, fmtSeconds, fmtSpeed } from "@/lib/format"
+import CreatorLogo from "@/components/CreatorLogo"
 
 const BATCH = 40
 
@@ -221,9 +222,17 @@ export default function TextTable({ models }: { models: TextModel[] }) {
                     </td>
                   )}
                   <td className="name-cell">
-                    <a href={`/model/${m.slug}`}>{m.name}</a>
+                    <span className="cell-logo">
+                      <CreatorLogo slug={m.model_creator?.slug} size={14} />
+                      <a href={`/model/${m.slug}`}>{m.name}</a>
+                    </span>
                   </td>
-                  <td className="creator-cell">{m.model_creator?.name ?? "-"}</td>
+                  <td className="creator-cell">
+                    <span className="cell-logo">
+                      <CreatorLogo slug={m.model_creator?.slug} size={18} />
+                      <span>{m.model_creator?.name ?? "-"}</span>
+                    </span>
+                  </td>
                   <td className="date-cell">{fmtDate(m.release_date)}</td>
                   {showPrice && [
                     <td key="pi" className="num-cell">{fmtPrice(m.pricing?.price_1m_input_tokens ?? null, cny)}</td>,
