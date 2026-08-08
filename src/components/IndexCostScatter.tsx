@@ -209,6 +209,8 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
   const animRef = useRef<number | null>(null)
   const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map())
   const pinchRef = useRef<{ dist: number; view: View } | null>(null)
+  /** 本次手势是否发生过位移（拖动/捏合），用于手势结束后拦截误点击跳转 */
+  const movedRef = useRef(false)
 
   /** 带缓动的视图迁移（easeOutCubic，260ms），缩放/重置都走这里 */
   function animateTo(to: View) {
@@ -291,7 +293,11 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
     const v = viewRef.current
     if (!v) return
     if (animRef.current) cancelAnimationFrame(animRef.current)
+    // 每根手指都捕获到 SVG 根元素：捕获到子元素（<a>/<image>/<text>）在 iOS 上不可靠，
+    // 会导致第二根手指的 down/move 丢失，双指捏合退化为单指拖动
+    try { svgRef.current?.setPointerCapture?.(e.pointerId) } catch { /* 老浏览器容错 */ }
     pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    movedRef.current = false
     if (pointersRef.current.size === 2) {
       const [a, b] = [...pointersRef.current.values()]
       const dist = Math.hypot(b.x - a.x, b.y - a.y)
@@ -300,9 +306,10 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
       setDragging(false)
       return
     }
-    ;(e.target as Element).setPointerCapture?.(e.pointerId)
-    dragRef.current = { sx: e.clientX, sy: e.clientY, view: v, moved: false }
-    setDragging(true)
+    if (pointersRef.current.size === 1) {
+      dragRef.current = { sx: e.clientX, sy: e.clientY, view: v, moved: false }
+      setDragging(true)
+    }
   }
   const onPointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
     const pt = pointersRef.current.get(e.pointerId)
@@ -310,8 +317,19 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
     pt.x = e.clientX
     pt.y = e.clientY
     if (pointersRef.current.size >= 2) {
+      // pinch 基线缺失时自愈重建（事件乱序/部分丢失时兜底），避免退化为拖动
+      if (!pinchRef.current) {
+        const v = viewRef.current
+        if (!v) return
+        const [a, b] = [...pointersRef.current.values()]
+        const dist = Math.hypot(b.x - a.x, b.y - a.y)
+        pinchRef.current = { dist: Math.max(dist, 1), view: v }
+        dragRef.current = null
+        setDragging(false)
+      }
       const pinch = pinchRef.current
       if (pinch && full && svgRef.current) {
+        movedRef.current = true
         const [a, b] = [...pointersRef.current.values()]
         const dist = Math.max(Math.hypot(b.x - a.x, b.y - a.y), 1)
         const factor = dist / pinch.dist
@@ -328,7 +346,10 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
     }
     const drag = dragRef.current
     if (!drag || !full) return
-    if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 3) drag.moved = true
+    if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 3) {
+      drag.moved = true
+      movedRef.current = true
+    }
     const rect = svgRef.current!.getBoundingClientRect()
     const s = W / rect.width
     const dx = (e.clientX - drag.sx) * s
@@ -347,7 +368,18 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
   }
   const onPointerUp = (e: React.PointerEvent<SVGSVGElement>) => {
     pointersRef.current.delete(e.pointerId)
+    try { svgRef.current?.releasePointerCapture?.(e.pointerId) } catch { /* noop */ }
     if (pointersRef.current.size < 2) pinchRef.current = null
+    if (pointersRef.current.size === 1) {
+      // 双指 → 单指降级：用剩余手指当前位置重建拖动起点，手势不断档
+      const [rest] = [...pointersRef.current.values()]
+      const v = viewRef.current
+      if (v) {
+        dragRef.current = { sx: rest.x, sy: rest.y, view: v, moved: true }
+        setDragging(true)
+      }
+      return
+    }
     if (pointersRef.current.size === 0) {
       dragRef.current = null
       setDragging(false)
@@ -438,7 +470,6 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        onPointerLeave={onPointerUp}
       >
         {xSubTicks.map((t) => (
           <line key={`xs${t}`} x1={px(t)} y1={T} x2={px(t)} y2={T + IH} className="scatter-grid-sub" />
@@ -484,7 +515,11 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
               href={`/model/${p.m.slug}`}
               className="scatter-logo-link"
               onClick={(e) => {
-                if (dragRef.current?.moved) e.preventDefault()
+                // 手势（拖动/捏合）结束后的 click 不触发跳转；纯点按才放行
+                if (movedRef.current) {
+                  e.preventDefault()
+                  movedRef.current = false
+                }
               }}
             >
               {logo ? (

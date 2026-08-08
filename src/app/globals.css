@@ -279,7 +279,9 @@ a { color: inherit; text-decoration: none; }
 .chart-unit { margin-top: 10px; text-align: center; font-size: 11px; color: var(--text-faint); }
 
 /* 散点图 */
-.scatter-card { padding: 16px 16px 12px; }
+/* touch-action 同时加在卡片容器上：iOS Safari 对 SVG 元素上的 touch-action 支持不完整，
+   只加在 svg 上时双指手势可能被浏览器接管为页面缩放/滚动，导致捏合中断退化为拖动 */
+.scatter-card { padding: 16px 16px 12px; touch-action: none; }
 .scatter-svg { width: 100%; height: auto; display: block; cursor: grab; touch-action: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 .scatter-svg.dragging { cursor: grabbing; }
 .scatter-grid { stroke: rgba(148, 163, 218, 0.18); stroke-width: 1; }
