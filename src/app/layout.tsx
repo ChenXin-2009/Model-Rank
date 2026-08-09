@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import "./globals.css"
+import { Analytics } from "@vercel/analytics/next"
 import { SITE_URL } from "@/lib/site"
 
 const bingVerify = process.env.NEXT_PUBLIC_BING_VERIFY
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body>{children}<Analytics /></body>
     </html>
   )
 }
