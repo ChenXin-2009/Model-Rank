@@ -115,6 +115,18 @@ function fmtTick(v: number): string {
   return String(+v.toPrecision(2))
 }
 
+/** 等差刻度的"整齐"步长：取 1/2/2.5/5 × 10^k */
+function niceStep(raw: number): number {
+  if (!(raw > 0) || !Number.isFinite(raw)) return 1
+  const p = Math.pow(10, Math.floor(Math.log10(raw)))
+  const r = raw / p
+  if (r <= 1) return p
+  if (r <= 2) return 2 * p
+  if (r <= 2.5) return 2.5 * p
+  if (r <= 5) return 5 * p
+  return 10 * p
+}
+
 /** 线段裁剪到 [lo, hi] 水平带内（散点图只有 y 方向会越界），返回裁剪后的端点 */
 function clipToBand(
   x1: number, y1: number, x2: number, y2: number, lo: number, hi: number
@@ -142,6 +154,9 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
   const IW = W - L - R
   const H = mobilePortrait ? 640 : 470
   const IH = H - T - B
+
+  /** 横轴刻度：log=对数（默认），lin=等差 */
+  const [xScale, setXScale] = useState<"log" | "lin">("log")
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 900px) and (orientation: portrait)")
     const apply = () => setMobilePortrait(mq.matches)
@@ -213,6 +228,11 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
   function animateTo(to: View) {
     const from = viewRef.current
     if (!from) return
+    if (!Number.isFinite(from.lxMin) || !Number.isFinite(from.lxMax) || !Number.isFinite(from.yMin) || !Number.isFinite(from.yMax)) {
+      viewRef.current = to
+      setView(to)
+      return
+    }
     if (animRef.current) cancelAnimationFrame(animRef.current)
     const dur = 260
     const t0 = performance.now()
@@ -238,6 +258,12 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
 
   const px = (v: number) => {
     if (!view) return L
+    if (xScale === "lin") {
+      const linMin = 10 ** view.lxMin
+      const linMax = 10 ** view.lxMax
+      const c = Math.min(linMax, Math.max(linMin, v))
+      return L + ((c - linMin) / (linMax - linMin)) * IW
+    }
     const log = Math.log10(Math.min(10 ** view.lxMax, Math.max(10 ** view.lxMin, v)))
     return L + ((log - view.lxMin) / (view.lxMax - view.lxMin)) * IW
   }
@@ -248,25 +274,47 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
 
   /** 等比缩放：横纵轴始终使用同一个缩放系数；任一轴到达边界时两轴一起停 */
   const zoomAt = (mx: number, my: number, factor: number, v: View, fullX: { xMin: number; xMax: number }): View => {
-    const fMin = Math.log10(fullX.xMin)
-    const fMax = Math.log10(fullX.xMax)
-    const xRange = v.lxMax - v.lxMin
+    const fullRange =
+      xScale === "log"
+        ? Math.log10(fullX.xMax) - Math.log10(fullX.xMin)
+        : fullX.xMax - fullX.xMin
+    const fullLogRange = Math.log10(fullX.xMax) - Math.log10(fullX.xMin)
+    const xRange =
+      xScale === "log"
+        ? v.lxMax - v.lxMin
+        : 10 ** v.lxMax - 10 ** v.lxMin
     const yRange = v.yMax - v.yMin
-    const fLow = Math.max(MIN_X_RANGE / xRange, MIN_Y_RANGE / (Y_FULL_MAX - Y_FULL_MIN))
-    const fHigh = Math.min((fMax - fMin) / xRange, (Y_FULL_MAX - Y_FULL_MIN) / yRange)
+    const minX = xScale === "log" ? MIN_X_RANGE : (MIN_X_RANGE / fullLogRange) * fullRange
+    const fLow = Math.max(minX / xRange, MIN_Y_RANGE / (Y_FULL_MAX - Y_FULL_MIN))
+    const fHigh = Math.min(fullRange / xRange, (Y_FULL_MAX - Y_FULL_MIN) / yRange)
     const f = Math.min(Math.max(factor, fLow), fHigh)
     const newXRange = xRange * f
     const newYRange = yRange * f
     const fracX = (mx - L) / IW
     const fracY = (my - T) / IH
-    const logAt = v.lxMin + fracX * xRange
     const valAt = v.yMax - fracY * yRange
-    let lxMin = logAt - fracX * newXRange
-    let lxMax = lxMin + newXRange
     let yMin = valAt - fracY * newYRange
     let yMax = yMin + newYRange
-    if (lxMin > fMax) { lxMin = fMax - newXRange; lxMax = fMax }
-    if (lxMax < fMin) { lxMax = fMin + newXRange; lxMin = fMin }
+    let lxMin: number, lxMax: number
+    if (xScale === "lin") {
+      const linMin = 10 ** v.lxMin
+      const linMax = 10 ** v.lxMax
+      const priceAt = linMin + fracX * xRange
+      let nLinMin = priceAt - fracX * newXRange
+      let nLinMax = nLinMin + newXRange
+      if (nLinMin > fullX.xMax) { nLinMin = fullX.xMax - newXRange; nLinMax = fullX.xMax }
+      if (nLinMax < fullX.xMin) { nLinMax = fullX.xMin + newXRange; nLinMin = fullX.xMin }
+      lxMin = Math.log10(nLinMin)
+      lxMax = Math.log10(nLinMax)
+    } else {
+      const logAt = v.lxMin + fracX * xRange
+      const fMin = Math.log10(fullX.xMin)
+      const fMax = Math.log10(fullX.xMax)
+      lxMin = logAt - fracX * newXRange
+      lxMax = lxMin + newXRange
+      if (lxMin > fMax) { lxMin = fMax - newXRange; lxMax = fMax }
+      if (lxMax < fMin) { lxMax = fMin + newXRange; lxMin = fMin }
+    }
     if (yMin > Y_FULL_MAX) { yMin = Y_FULL_MAX - newYRange; yMax = Y_FULL_MAX }
     if (yMax < Y_FULL_MIN) { yMax = Y_FULL_MIN + newYRange; yMin = Y_FULL_MIN }
     return { lxMin, lxMax, yMin, yMax }
@@ -306,17 +354,31 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
     const s = W / rect.width
     const dx = (e.clientX - drag.sx) * s
     const dy = (e.clientY - drag.sy) * s
-    const xRange = drag.view.lxMax - drag.view.lxMin
+    const xRange = xScale === "log" ? drag.view.lxMax - drag.view.lxMin : 10 ** drag.view.lxMax - 10 ** drag.view.lxMin
     const yRange = drag.view.yMax - drag.view.yMin
-    const fMin = Math.log10(full.xMin)
-    const fMax = Math.log10(full.xMax)
-    let lxMin = drag.view.lxMin - (dx / IW) * xRange
+    let lxMin: number
+    let lxMax: number
+    if (xScale === "lin") {
+      const fLinMin = full.xMin
+      const fLinMax = full.xMax
+      let nLinMin = 10 ** drag.view.lxMin - (dx / IW) * xRange
+      if (nLinMin > fLinMax) nLinMin = fLinMax
+      if (nLinMin + xRange < fLinMin) nLinMin = fLinMin - xRange
+      if (nLinMin <= 0) nLinMin = Math.max(fLinMin / 100, 1e-9)
+      lxMin = Math.log10(nLinMin)
+      lxMax = Math.log10(nLinMin + xRange)
+    } else {
+      const fMin = Math.log10(full.xMin)
+      const fMax = Math.log10(full.xMax)
+      lxMin = drag.view.lxMin - (dx / IW) * xRange
+      if (lxMin > fMax) lxMin = fMax
+      if (lxMin + xRange < fMin) lxMin = fMin - xRange
+      lxMax = lxMin + xRange
+    }
     let yMin = drag.view.yMin + (dy / IH) * yRange
-    if (lxMin > fMax) lxMin = fMax
-    if (lxMin + xRange < fMin) lxMin = fMin - xRange
     if (yMin > Y_FULL_MAX) yMin = Y_FULL_MAX
     if (yMin + yRange < Y_FULL_MIN) yMin = Y_FULL_MIN - yRange
-    setView({ lxMin, lxMax: lxMin + xRange, yMin, yMax: yMin + yRange })
+    setView({ lxMin, lxMax, yMin, yMax: yMin + yRange })
   }
   const onPointerUp = () => {
     dragRef.current = null
@@ -351,12 +413,16 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
       p.y <= view.yMax
   )
 
-  /** 对数网格：水平按视野自适应取 1/0.5/0.25/0.1 十进位步长；垂直步长由水平网格的像素边长精确反推，
-   *  使每个大网格单元始终保持 1:1 方块；每个单元内部再画一半步长的浅色小网格 */
+  /** 网格：对数模式水平按十进位步长（1/0.5/0.25/0.1），等差模式取整齐步长；
+   *  垂直步长由水平网格的像素边长精确反推，使每个大网格单元始终保持 1:1 方块；每个单元内部再画一半步长的浅色小网格 */
   const rangeX = view.lxMax - view.lxMin
   const rangeY = view.yMax - view.yMin
-  const xStep = [1, 0.5, 0.25, 0.1].find((s) => rangeX / s >= 2) ?? 0.05
-  const pitch = xStep * (IW / rangeX)
+  const rangeXL = xScale === "lin" ? 10 ** view.lxMax - 10 ** view.lxMin : rangeX
+  const xStep =
+    xScale === "lin"
+      ? niceStep(rangeXL / 6)
+      : [1, 0.5, 0.25, 0.1].find((s) => rangeX / s >= 2) ?? 0.05
+  const pitch = xStep * (IW / rangeXL)
   let yStep = +((pitch * rangeY) / IH).toPrecision(2)
   const yCount = rangeY / yStep
   if (yCount > 12) yStep = +(yStep * 2).toPrecision(2)
@@ -365,11 +431,23 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
 
   const xTicks: number[] = []
   const xSubTicks: number[] = []
-  for (let i = Math.floor(view.lxMin / xStep) - 1; i <= Math.ceil(view.lxMax / xStep) + 1; i++) {
-    const major = 10 ** (i * xStep)
-    if (major >= 10 ** view.lxMin && major <= 10 ** view.lxMax) xTicks.push(major)
-    const sub = 10 ** ((i + 0.5) * xStep)
-    if (sub >= 10 ** view.lxMin && sub <= 10 ** view.lxMax) xSubTicks.push(sub)
+  if (xScale === "lin") {
+    const linMin = 10 ** view.lxMin
+    const linMax = 10 ** view.lxMax
+    const half = xStep / 2
+    for (let i = Math.floor(linMin / half) - 1; i <= Math.ceil(linMax / half) + 1; i++) {
+      const v = +(i * half).toFixed(8)
+      if (v < linMin || v > linMax) continue
+      if (i % 2 === 0) xTicks.push(v)
+      else xSubTicks.push(v)
+    }
+  } else {
+    for (let i = Math.floor(view.lxMin / xStep) - 1; i <= Math.ceil(view.lxMax / xStep) + 1; i++) {
+      const major = 10 ** (i * xStep)
+      if (major >= 10 ** view.lxMin && major <= 10 ** view.lxMax) xTicks.push(major)
+      const sub = 10 ** ((i + 0.5) * xStep)
+      if (sub >= 10 ** view.lxMin && sub <= 10 ** view.lxMax) xSubTicks.push(sub)
+    }
   }
 
   const yTicks: number[] = []
@@ -385,17 +463,31 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
   const zoomPct = full
     ? Math.round(
         Math.sqrt(
-          ((Math.log10(full.xMax) - Math.log10(full.xMin)) / (view.lxMax - view.lxMin)) *
+          (xScale === "lin"
+            ? (full.xMax - full.xMin) / (10 ** view.lxMax - 10 ** view.lxMin)
+            : (Math.log10(full.xMax) - Math.log10(full.xMin)) / (view.lxMax - view.lxMin)) *
             ((Y_FULL_MAX - Y_FULL_MIN) / (view.yMax - view.yMin))
         ) * 100
       )
     : 100
+
+  /** 切换横轴刻度：保持当前视野端点不变，仅改变刻度映射 */
+  const toggleScale = () => setXScale((s) => (s === "log" ? "lin" : "log"))
 
   return (
     <section className="chart-card scatter-card">
       <div className="chart-head">
         <h2>智能指数 vs 价格</h2>
         <span className="chart-badge">性价比</span>
+        <button
+          type="button"
+          className="scale-toggle"
+          aria-label="切换横轴刻度"
+          title={`点击切换为${xScale === "log" ? "等差" : "对数"}刻度`}
+          onClick={toggleScale}
+        >
+          横轴 {xScale === "log" ? "等差" : "对数"}
+        </button>
         <div className="zoom-ctrl">
           <button type="button" className="zoom-btn" aria-label="缩小" title="缩小" onClick={() => zoomBy(1.3)}>−</button>
           <span className="zoom-badge">缩放 {zoomPct}%</span>
@@ -403,7 +495,7 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
         </div>
         <button className="btn btn-sm" onClick={resetView}>↺ 重置视图</button>
       </div>
-      <p className="chart-desc">横轴：综合价格（$/1M，对数坐标）· 纵轴：智能指数 · 滚轮以屏幕中心等比缩放（带缓动）</p>
+      <p className="chart-desc">横轴：综合价格（$/1M，{xScale === "log" ? "对数坐标" : "等差坐标"}）· 纵轴：智能指数 · 滚轮以屏幕中心等比缩放（带缓动）</p>
 
       <svg
         viewBox={`0 0 ${W} ${H}`}
@@ -434,17 +526,33 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
             <text x={L - 6} y={py(t) + 4} className="scatter-tick" textAnchor="end">{fmtTick(t)}</text>
           </g>
         ))}
-        <text x={L + IW / 2} y={H - 1} className="scatter-axis" textAnchor="middle">综合价格（美元/百万 tokens，对数刻度）</text>
+        <text x={L + IW / 2} y={H - 1} className="scatter-axis" textAnchor="middle">综合价格（美元/百万 tokens，{xScale === "log" ? "对数刻度" : "等差刻度"}）</text>
         <text x={14} y={T + IH / 2} className="scatter-axis" textAnchor="middle" transform={`rotate(-90 14 ${T + IH / 2})`}>智能指数评分</text>
 
         {fit && (() => {
-          const y1 = fit.m * view.lxMin + fit.b
-          const y2 = fit.m * view.lxMax + fit.b
-          const seg = clipToBand(L, py(y1), L + IW, py(y2), T, T + IH)
-          if (!seg) return null
-          return (
-            <line x1={seg[0]} y1={seg[1]} x2={seg[2]} y2={seg[3]} className="scatter-fit" />
-          )
+          if (xScale === "log") {
+            const y1 = fit.m * view.lxMin + fit.b
+            const y2 = fit.m * view.lxMax + fit.b
+            const seg = clipToBand(L, py(y1), L + IW, py(y2), T, T + IH)
+            if (!seg) return null
+            return (
+              <line x1={seg[0]} y1={seg[1]} x2={seg[2]} y2={seg[3]} className="scatter-fit" />
+            )
+          }
+          // 等差刻度：y = m·log10(x) + b 按对数均匀采样，绘制为平滑曲线
+          const N = 160
+          const segs: React.ReactElement[] = []
+          let prev: [number, number] | null = null
+          for (let i = 0; i <= N; i++) {
+            const x = 10 ** (view.lxMin + ((view.lxMax - view.lxMin) * i) / N)
+            const p: [number, number] = [px(x), py(fit.m * Math.log10(x) + fit.b)]
+            if (prev) {
+              const seg = clipToBand(prev[0], prev[1], p[0], p[1], T, T + IH)
+              if (seg) segs.push(<line key={i} x1={seg[0]} y1={seg[1]} x2={seg[2]} y2={seg[3]} className="scatter-fit" />)
+            }
+            prev = p
+          }
+          return <>{segs}</>
         })()}
 
         {visible.map((p) => {
@@ -489,7 +597,7 @@ export default function IndexCostScatter({ models }: { models: TextModel[] }) {
         })}
       </svg>
 
-      <p className="chart-unit">悬停查看详情，点击跳转模型页 · 滚轮缩放、拖动平移 · 虚线为线性拟合趋势线</p>
+      <p className="chart-unit">悬停查看详情，点击跳转模型页 · 滚轮缩放、拖动平移 · 虚线为拟合趋势线（对数刻度下呈直线，等差刻度下呈曲线）</p>
     </section>
   )
 }
