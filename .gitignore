@@ -7,6 +7,8 @@ coverage/
 next-env.d.ts
 .DS_Store
 .playwright-mcp/
+.workbuddy/
+*.bat
 start.log
 temp_status.txt
 dev-start.log
