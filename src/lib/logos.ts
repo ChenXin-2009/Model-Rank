@@ -62,13 +62,13 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/minimax_small.svg",
     "name": "MiniMax"
   },
-  "nvidia": {
-    "file": "/img/logos/nvidia_small.svg",
-    "name": "NVIDIA"
-  },
   "alibaba": {
     "file": "/img/logos/alibaba_small.svg",
     "name": "Alibaba"
+  },
+  "nvidia": {
+    "file": "/img/logos/nvidia_small.svg",
+    "name": "NVIDIA"
   },
   "kimi": {
     "file": "/img/logos/kimi.jpg",
