@@ -54,13 +54,13 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/liquidai_small.svg",
     "name": "Liquid AI"
   },
-  "upstage": {
-    "file": "/img/logos/upstage_small.svg",
-    "name": "Upstage"
-  },
   "alibaba": {
     "file": "/img/logos/alibaba_small.svg",
     "name": "Alibaba"
+  },
+  "upstage": {
+    "file": "/img/logos/upstage_small.svg",
+    "name": "Upstage"
   },
   "minimax": {
     "file": "/img/logos/minimax_small.svg",

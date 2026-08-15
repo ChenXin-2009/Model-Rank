@@ -1,8 +1,8 @@
 {
-  "date": "2026-08-14",
+  "date": "2026-08-15",
   "files": {
-    "models": 605,
-    "text-to-image": 148,
+    "models": 608,
+    "text-to-image": 145,
     "text-to-video": 78,
     "image-to-video": 72,
     "text-to-speech": 93
