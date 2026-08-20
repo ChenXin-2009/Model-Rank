@@ -46,13 +46,13 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/aws_small.svg",
     "name": "Amazon"
   },
-  "azure": {
-    "file": "/img/logos/microsoft_small.svg",
-    "name": "Microsoft"
-  },
   "alibaba": {
     "file": "/img/logos/alibaba_small.svg",
     "name": "Alibaba"
+  },
+  "azure": {
+    "file": "/img/logos/microsoft_small.svg",
+    "name": "Microsoft"
   },
   "liquidai": {
     "file": "/img/logos/liquidai_small.svg",
