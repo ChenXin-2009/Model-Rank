@@ -6,13 +6,13 @@ export interface CreatorLogoInfo {
 }
 
 export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
-  "xai": {
-    "file": "/img/logos/spacexai.svg",
-    "name": "SpaceXAI"
-  },
   "openai": {
     "file": "/img/logos/openai_small.svg",
     "name": "OpenAI"
+  },
+  "xai": {
+    "file": "/img/logos/spacexai.svg",
+    "name": "SpaceXAI"
   },
   "meta": {
     "file": "/img/logos/meta_small.svg",
