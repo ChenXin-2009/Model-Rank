@@ -6,6 +6,10 @@ export interface CreatorLogoInfo {
 }
 
 export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
+  "zai": {
+    "file": "/img/logos/zai_small.svg",
+    "name": "Z AI"
+  },
   "openai": {
     "file": "/img/logos/openai_small.svg",
     "name": "OpenAI"
@@ -189,10 +193,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "ai9star": {
     "file": "/img/logos/ai9stars.svg",
     "name": "AI9Stars"
-  },
-  "zai": {
-    "file": "/img/logos/zai_small.svg",
-    "name": "Z AI"
   },
   "cohere": {
     "file": "/img/logos/cohere_small.svg",
