@@ -1,7 +1,7 @@
 {
-  "date": "2026-08-28",
+  "date": "2026-08-29",
   "files": {
-    "models": 621,
+    "models": 624,
     "text-to-image": 155,
     "text-to-video": 80,
     "image-to-video": 74,

@@ -10,6 +10,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/zai_small.svg",
     "name": "Z AI"
   },
+  "alibaba": {
+    "file": "/img/logos/alibaba_small.svg",
+    "name": "Alibaba"
+  },
   "openai": {
     "file": "/img/logos/openai_small.svg",
     "name": "OpenAI"
@@ -49,10 +53,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "aws": {
     "file": "/img/logos/aws_small.svg",
     "name": "Amazon"
-  },
-  "alibaba": {
-    "file": "/img/logos/alibaba_small.svg",
-    "name": "Alibaba"
   },
   "azure": {
     "file": "/img/logos/microsoft_small.svg",
