@@ -14,6 +14,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/alibaba_small.svg",
     "name": "Alibaba"
   },
+  "multiversecomputing": {
+    "file": "/img/logos/multiversecomputing_small.svg",
+    "name": "Multiverse Computing"
+  },
   "openai": {
     "file": "/img/logos/openai_small.svg",
     "name": "OpenAI"
@@ -118,10 +122,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/sarvam.svg",
     "name": "Sarvam"
   },
-  "multiversecomputing": {
-    "file": "/img/logos/multiversecomputing_small.svg",
-    "name": "Multiverse Computing"
-  },
   "deepcogito": {
     "file": "/img/logos/deepcogito_small.png",
     "name": "Deep Cogito"
@@ -193,6 +193,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "ai9star": {
     "file": "/img/logos/ai9stars.svg",
     "name": "AI9Stars"
+  },
+  "apodex": {
+    "file": "/img/logos/apodex.svg",
+    "name": "Apodex"
   },
   "cohere": {
     "file": "/img/logos/cohere_small.svg",
