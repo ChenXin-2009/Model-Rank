@@ -10,6 +10,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/zai_small.svg",
     "name": "Z AI"
   },
+  "google": {
+    "file": "/img/logos/google_small.svg",
+    "name": "Google"
+  },
   "alibaba": {
     "file": "/img/logos/alibaba_small.svg",
     "name": "Alibaba"
@@ -29,10 +33,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "meta": {
     "file": "/img/logos/meta_small.svg",
     "name": "Meta"
-  },
-  "google": {
-    "file": "/img/logos/google_small.svg",
-    "name": "Google"
   },
   "anthropic": {
     "file": "/img/logos/anthropic_small.svg",
