@@ -6,6 +6,10 @@ export interface CreatorLogoInfo {
 }
 
 export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
+  "openai": {
+    "file": "/img/logos/openai_small.svg",
+    "name": "OpenAI"
+  },
   "zai": {
     "file": "/img/logos/zai_small.svg",
     "name": "Z AI"
@@ -18,13 +22,13 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/alibaba_small.svg",
     "name": "Alibaba"
   },
+  "mbzuai": {
+    "file": "/img/logos/mbzuai_small.svg",
+    "name": "MBZUAI Institute of Foundation Models"
+  },
   "multiversecomputing": {
     "file": "/img/logos/multiversecomputing_small.svg",
     "name": "Multiverse Computing"
-  },
-  "openai": {
-    "file": "/img/logos/openai_small.svg",
-    "name": "OpenAI"
   },
   "xai": {
     "file": "/img/logos/spacexai.svg",
@@ -141,10 +145,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "motif-technologies": {
     "file": "/img/logos/motif_small.svg",
     "name": "Motif Technologies"
-  },
-  "mbzuai": {
-    "file": "/img/logos/mbzuai_small.svg",
-    "name": "MBZUAI Institute of Foundation Models"
   },
   "korea-telecom": {
     "file": "/img/logos/korea-telecom_small.png",

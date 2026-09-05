@@ -1,8 +1,8 @@
 {
-  "date": "2026-09-04",
+  "date": "2026-09-05",
   "files": {
-    "models": 634,
-    "text-to-image": 155,
+    "models": 643,
+    "text-to-image": 156,
     "text-to-video": 81,
     "image-to-video": 75,
     "text-to-speech": 98
