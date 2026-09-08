@@ -30,6 +30,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/multiversecomputing_small.svg",
     "name": "Multiverse Computing"
   },
+  "openbmb": {
+    "file": "/img/logos/openbmb_small.svg",
+    "name": "OpenBMB"
+  },
   "xai": {
     "file": "/img/logos/spacexai.svg",
     "name": "SpaceXAI"
@@ -169,10 +173,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "swiss-ai-initiative": {
     "file": "/img/logos/swiss-ai-initiative_small.png",
     "name": "Swiss AI Initiative"
-  },
-  "openbmb": {
-    "file": "/img/logos/openbmb_small.svg",
-    "name": "OpenBMB"
   },
   "arcee": {
     "file": "/img/logos/arcee_small.svg",
