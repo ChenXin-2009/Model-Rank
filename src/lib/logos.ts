@@ -22,10 +22,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/alibaba_small.svg",
     "name": "Alibaba"
   },
-  "mbzuai": {
-    "file": "/img/logos/mbzuai_small.svg",
-    "name": "MBZUAI Institute of Foundation Models"
-  },
   "multiversecomputing": {
     "file": "/img/logos/multiversecomputing_small.svg",
     "name": "Multiverse Computing"
@@ -33,6 +29,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "openbmb": {
     "file": "/img/logos/openbmb_small.svg",
     "name": "OpenBMB"
+  },
+  "mbzuai": {
+    "file": "/img/logos/mbzuai_small.svg",
+    "name": "MBZUAI Institute of Foundation Models"
   },
   "xai": {
     "file": "/img/logos/spacexai.svg",
