@@ -22,9 +22,17 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/alibaba_small.svg",
     "name": "Alibaba"
   },
+  "deepseek": {
+    "file": "/img/logos/deepseek_small.svg",
+    "name": "DeepSeek"
+  },
   "multiversecomputing": {
     "file": "/img/logos/multiversecomputing_small.svg",
     "name": "Multiverse Computing"
+  },
+  "inclusionai": {
+    "file": "/img/logos/inclusionai_small.jpg",
+    "name": "InclusionAI"
   },
   "openbmb": {
     "file": "/img/logos/openbmb_small.svg",
@@ -49,10 +57,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "mistral": {
     "file": "/img/logos/mistral_small.png",
     "name": "Mistral"
-  },
-  "deepseek": {
-    "file": "/img/logos/deepseek_small.svg",
-    "name": "DeepSeek"
   },
   "perplexity": {
     "file": "/img/logos/perplexity_small.png",
@@ -209,10 +213,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "ai21-labs": {
     "file": "/img/logos/ai21_small.svg",
     "name": "AI21 Labs"
-  },
-  "inclusionai": {
-    "file": "/img/logos/inclusionai_small.jpg",
-    "name": "InclusionAI"
   },
   "bytedance_seed": {
     "file": "/img/logos/bytedance_small.svg",
