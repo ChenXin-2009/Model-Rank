@@ -38,6 +38,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/openbmb_small.svg",
     "name": "OpenBMB"
   },
+  "agnes-ai": {
+    "file": "/img/logos/sapiens.svg",
+    "name": "Sapiens AI"
+  },
   "mbzuai": {
     "file": "/img/logos/mbzuai_small.svg",
     "name": "MBZUAI Institute of Foundation Models"
@@ -217,10 +221,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "bytedance_seed": {
     "file": "/img/logos/bytedance_small.svg",
     "name": "ByteDance Seed"
-  },
-  "agnes-ai": {
-    "file": "/img/logos/sapiens.svg",
-    "name": "Sapiens AI"
   },
   "celeris": {
     "file": "/img/logos/celeris.svg",
