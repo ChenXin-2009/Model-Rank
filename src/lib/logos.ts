@@ -26,6 +26,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/deepseek_small.svg",
     "name": "DeepSeek"
   },
+  "mbzuai": {
+    "file": "/img/logos/mbzuai_small.svg",
+    "name": "MBZUAI Institute of Foundation Models"
+  },
   "multiversecomputing": {
     "file": "/img/logos/multiversecomputing_small.svg",
     "name": "Multiverse Computing"
@@ -41,10 +45,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "agnes-ai": {
     "file": "/img/logos/sapiens.svg",
     "name": "Sapiens AI"
-  },
-  "mbzuai": {
-    "file": "/img/logos/mbzuai_small.svg",
-    "name": "MBZUAI Institute of Foundation Models"
   },
   "xai": {
     "file": "/img/logos/spacexai.svg",
