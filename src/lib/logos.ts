@@ -6,13 +6,29 @@ export interface CreatorLogoInfo {
 }
 
 export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
+  "anthropic": {
+    "file": "/img/logos/anthropic_small.svg",
+    "name": "Anthropic"
+  },
   "openai": {
     "file": "/img/logos/openai_small.svg",
     "name": "OpenAI"
   },
+  "meta": {
+    "file": "/img/logos/meta_small.svg",
+    "name": "Meta"
+  },
   "zai": {
     "file": "/img/logos/zai_small.svg",
     "name": "Z AI"
+  },
+  "xai": {
+    "file": "/img/logos/spacexai.svg",
+    "name": "SpaceXAI"
+  },
+  "kimi": {
+    "file": "/img/logos/kimi.jpg",
+    "name": "Kimi"
   },
   "google": {
     "file": "/img/logos/google_small.svg",
@@ -26,185 +42,101 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/deepseek_small.svg",
     "name": "DeepSeek"
   },
-  "mbzuai": {
-    "file": "/img/logos/mbzuai_small.svg",
-    "name": "MBZUAI Institute of Foundation Models"
-  },
-  "multiversecomputing": {
-    "file": "/img/logos/multiversecomputing_small.svg",
-    "name": "Multiverse Computing"
-  },
-  "inclusionai": {
-    "file": "/img/logos/inclusionai_small.jpg",
-    "name": "InclusionAI"
-  },
-  "openbmb": {
-    "file": "/img/logos/openbmb_small.svg",
-    "name": "OpenBMB"
-  },
   "agnes-ai": {
     "file": "/img/logos/sapiens.svg",
     "name": "Sapiens AI"
-  },
-  "xai": {
-    "file": "/img/logos/spacexai.svg",
-    "name": "SpaceXAI"
-  },
-  "meta": {
-    "file": "/img/logos/meta_small.svg",
-    "name": "Meta"
-  },
-  "anthropic": {
-    "file": "/img/logos/anthropic_small.svg",
-    "name": "Anthropic"
-  },
-  "mistral": {
-    "file": "/img/logos/mistral_small.png",
-    "name": "Mistral"
-  },
-  "perplexity": {
-    "file": "/img/logos/perplexity_small.png",
-    "name": "Perplexity"
-  },
-  "tii-uae": {
-    "file": "/img/logos/tii_small.svg",
-    "name": "TII UAE"
-  },
-  "aws": {
-    "file": "/img/logos/aws_small.svg",
-    "name": "Amazon"
-  },
-  "azure": {
-    "file": "/img/logos/microsoft_small.svg",
-    "name": "Microsoft"
-  },
-  "liquidai": {
-    "file": "/img/logos/liquidai_small.svg",
-    "name": "Liquid AI"
-  },
-  "upstage": {
-    "file": "/img/logos/upstage_small.svg",
-    "name": "Upstage"
-  },
-  "minimax": {
-    "file": "/img/logos/minimax_small.svg",
-    "name": "MiniMax"
-  },
-  "nvidia": {
-    "file": "/img/logos/nvidia_small.svg",
-    "name": "NVIDIA"
-  },
-  "kimi": {
-    "file": "/img/logos/kimi.jpg",
-    "name": "Kimi"
-  },
-  "stepfun": {
-    "file": "/img/logos/stepfun_small.svg",
-    "name": "StepFun"
-  },
-  "ai2": {
-    "file": "/img/logos/ai2_small.svg",
-    "name": "Allen Institute for AI"
-  },
-  "ibm": {
-    "file": "/img/logos/ibm_small.svg",
-    "name": "IBM"
-  },
-  "inception": {
-    "file": "/img/logos/inceptionlabs_small.svg",
-    "name": "Inception"
-  },
-  "reka-ai": {
-    "file": "/img/logos/reka_small.svg",
-    "name": "Reka AI"
-  },
-  "nous-research": {
-    "file": "/img/logos/nousresearch_small.jpg",
-    "name": "Nous Research"
-  },
-  "lg": {
-    "file": "/img/logos/lg_small.png",
-    "name": "LG AI Research"
-  },
-  "xiaomi": {
-    "file": "/img/logos/xiaomi_small.svg",
-    "name": "Xiaomi"
-  },
-  "baidu": {
-    "file": "/img/logos/baidu_small.svg",
-    "name": "Baidu"
-  },
-  "sarvam": {
-    "file": "/img/logos/sarvam.svg",
-    "name": "Sarvam"
-  },
-  "deepcogito": {
-    "file": "/img/logos/deepcogito_small.png",
-    "name": "Deep Cogito"
-  },
-  "tencent": {
-    "file": "/img/logos/tencent_small.svg",
-    "name": "Tencent"
-  },
-  "kwaikat": {
-    "file": "/img/logos/kwaikat_small.svg",
-    "name": "KwaiKAT"
-  },
-  "prime-intellect": {
-    "file": "/img/logos/prime-intellect_small.svg",
-    "name": "Prime Intellect"
   },
   "motif-technologies": {
     "file": "/img/logos/motif_small.svg",
     "name": "Motif Technologies"
   },
-  "korea-telecom": {
-    "file": "/img/logos/korea-telecom_small.png",
-    "name": "Korea Telecom"
+  "mbzuai": {
+    "file": "/img/logos/mbzuai_small.svg",
+    "name": "MBZUAI Institute of Foundation Models"
   },
-  "naver": {
-    "file": "/img/logos/naver_small.webp",
-    "name": "Naver"
+  "apodex": {
+    "file": "/img/logos/apodex.svg",
+    "name": "Apodex"
   },
-  "longcat": {
-    "file": "/img/logos/longcat_small.svg",
-    "name": "LongCat"
+  "minimax": {
+    "file": "/img/logos/minimax_small.svg",
+    "name": "MiniMax"
   },
-  "trillionlabs": {
-    "file": "/img/logos/trillionlabs_small.svg",
-    "name": "Trillion Labs"
-  },
-  "nanbeige": {
-    "file": "/img/logos/nanbeige_small.png",
-    "name": "Nanbeige"
-  },
-  "swiss-ai-initiative": {
-    "file": "/img/logos/swiss-ai-initiative_small.png",
-    "name": "Swiss AI Initiative"
-  },
-  "arcee": {
-    "file": "/img/logos/arcee_small.svg",
-    "name": "Arcee AI"
-  },
-  "china-mobile": {
-    "file": "/img/logos/china_mobile_small.png",
-    "name": "China Mobile"
+  "xiaomi": {
+    "file": "/img/logos/xiaomi_small.svg",
+    "name": "Xiaomi"
   },
   "nex": {
     "file": "/img/logos/nex_small.svg",
     "name": "Nex AGI"
   },
+  "upstage": {
+    "file": "/img/logos/upstage_small.svg",
+    "name": "Upstage"
+  },
+  "china-mobile": {
+    "file": "/img/logos/china_mobile_small.png",
+    "name": "China Mobile"
+  },
+  "multiversecomputing": {
+    "file": "/img/logos/multiversecomputing_small.svg",
+    "name": "Multiverse Computing"
+  },
   "thinking-machines": {
     "file": "/img/logos/thinking_machines.svg",
     "name": "Thinking Machines"
+  },
+  "tencent": {
+    "file": "/img/logos/tencent_small.svg",
+    "name": "Tencent"
+  },
+  "inclusionai": {
+    "file": "/img/logos/inclusionai_small.jpg",
+    "name": "InclusionAI"
+  },
+  "nvidia": {
+    "file": "/img/logos/nvidia_small.svg",
+    "name": "NVIDIA"
   },
   "ai9star": {
     "file": "/img/logos/ai9stars.svg",
     "name": "AI9Stars"
   },
-  "apodex": {
-    "file": "/img/logos/apodex.svg",
-    "name": "Apodex"
+  "kwaikat": {
+    "file": "/img/logos/kwaikat_small.svg",
+    "name": "KwaiKAT"
+  },
+  "lg": {
+    "file": "/img/logos/lg_small.png",
+    "name": "LG AI Research"
+  },
+  "longcat": {
+    "file": "/img/logos/longcat_small.svg",
+    "name": "LongCat"
+  },
+  "stepfun": {
+    "file": "/img/logos/stepfun_small.svg",
+    "name": "StepFun"
+  },
+  "bytedance_seed": {
+    "file": "/img/logos/bytedance_small.svg",
+    "name": "ByteDance Seed"
+  },
+  "mistral": {
+    "file": "/img/logos/mistral_small.png",
+    "name": "Mistral"
+  },
+  "ibm": {
+    "file": "/img/logos/ibm_small.svg",
+    "name": "IBM"
+  },
+  "baidu": {
+    "file": "/img/logos/baidu_small.svg",
+    "name": "Baidu"
+  },
+  "aws": {
+    "file": "/img/logos/aws_small.svg",
+    "name": "Amazon"
   },
   "cohere": {
     "file": "/img/logos/cohere_small.svg",
@@ -214,17 +146,81 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/servicenow_small.svg",
     "name": "ServiceNow"
   },
-  "ai21-labs": {
-    "file": "/img/logos/ai21_small.svg",
-    "name": "AI21 Labs"
+  "openbmb": {
+    "file": "/img/logos/openbmb_small.svg",
+    "name": "OpenBMB"
   },
-  "bytedance_seed": {
-    "file": "/img/logos/bytedance_small.svg",
-    "name": "ByteDance Seed"
+  "perplexity": {
+    "file": "/img/logos/perplexity_small.png",
+    "name": "Perplexity"
+  },
+  "inception": {
+    "file": "/img/logos/inceptionlabs_small.svg",
+    "name": "Inception"
+  },
+  "naver": {
+    "file": "/img/logos/naver_small.webp",
+    "name": "Naver"
+  },
+  "korea-telecom": {
+    "file": "/img/logos/korea-telecom_small.png",
+    "name": "Korea Telecom"
+  },
+  "arcee": {
+    "file": "/img/logos/arcee_small.svg",
+    "name": "Arcee AI"
+  },
+  "prime-intellect": {
+    "file": "/img/logos/prime-intellect_small.svg",
+    "name": "Prime Intellect"
+  },
+  "trillionlabs": {
+    "file": "/img/logos/trillionlabs_small.svg",
+    "name": "Trillion Labs"
+  },
+  "sarvam": {
+    "file": "/img/logos/sarvam.svg",
+    "name": "Sarvam"
+  },
+  "nanbeige": {
+    "file": "/img/logos/nanbeige_small.png",
+    "name": "Nanbeige"
+  },
+  "liquidai": {
+    "file": "/img/logos/liquidai_small.svg",
+    "name": "Liquid AI"
+  },
+  "nous-research": {
+    "file": "/img/logos/nousresearch_small.jpg",
+    "name": "Nous Research"
+  },
+  "tii-uae": {
+    "file": "/img/logos/tii_small.svg",
+    "name": "TII UAE"
+  },
+  "ai2": {
+    "file": "/img/logos/ai2_small.svg",
+    "name": "Allen Institute for AI"
+  },
+  "reka-ai": {
+    "file": "/img/logos/reka_small.svg",
+    "name": "Reka AI"
   },
   "celeris": {
     "file": "/img/logos/celeris.svg",
     "name": "Celeris"
+  },
+  "azure": {
+    "file": "/img/logos/microsoft_small.svg",
+    "name": "Microsoft"
+  },
+  "ai21-labs": {
+    "file": "/img/logos/ai21_small.svg",
+    "name": "AI21 Labs"
+  },
+  "snowflake": {
+    "file": "/img/logos/snowflake_small.svg",
+    "name": "Snowflake"
   },
   "openchat": {
     "file": "/img/logos/openchat_small.png",
@@ -234,8 +230,12 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/databricks_small.png",
     "name": "Databricks"
   },
-  "snowflake": {
-    "file": "/img/logos/snowflake_small.svg",
-    "name": "Snowflake"
+  "swiss-ai-initiative": {
+    "file": "/img/logos/swiss-ai-initiative_small.png",
+    "name": "Swiss AI Initiative"
+  },
+  "deepcogito": {
+    "file": "/img/logos/deepcogito_small.png",
+    "name": "Deep Cogito"
   }
 }
