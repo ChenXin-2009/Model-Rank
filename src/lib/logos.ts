@@ -52,7 +52,7 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   },
   "mbzuai": {
     "file": "/img/logos/mbzuai_small.svg",
-    "name": "MBZUAI Institute of Foundation Models"
+    "name": "Institute of Foundation Models"
   },
   "apodex": {
     "file": "/img/logos/apodex.svg",
