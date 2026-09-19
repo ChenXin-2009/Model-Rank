@@ -50,8 +50,8 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/motif_small.svg",
     "name": "Motif Technologies"
   },
-  "mbzuai": {
-    "file": "/img/logos/mbzuai_small.svg",
+  "ifm": {
+    "file": "/img/logos/ifm_small.svg",
     "name": "Institute of Foundation Models"
   },
   "apodex": {
