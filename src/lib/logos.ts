@@ -34,6 +34,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/kimi.jpg",
     "name": "Kimi"
   },
+  "stepfun": {
+    "file": "/img/logos/stepfun_small.svg",
+    "name": "StepFun"
+  },
   "google": {
     "file": "/img/logos/google_small.svg",
     "name": "Google"
@@ -113,10 +117,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "longcat": {
     "file": "/img/logos/longcat_small.svg",
     "name": "LongCat"
-  },
-  "stepfun": {
-    "file": "/img/logos/stepfun_small.svg",
-    "name": "StepFun"
   },
   "bytedance_seed": {
     "file": "/img/logos/bytedance_small.svg",
