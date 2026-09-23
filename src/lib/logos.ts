@@ -18,6 +18,14 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/meta_small.svg",
     "name": "Meta"
   },
+  "xai": {
+    "file": "/img/logos/spacexai.svg",
+    "name": "SpaceXAI"
+  },
+  "xiaomi": {
+    "file": "/img/logos/xiaomi_small.svg",
+    "name": "Xiaomi"
+  },
   "alibaba": {
     "file": "/img/logos/alibaba_small.svg",
     "name": "Alibaba"
@@ -25,10 +33,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "zai": {
     "file": "/img/logos/zai_small.svg",
     "name": "Z AI"
-  },
-  "xai": {
-    "file": "/img/logos/spacexai.svg",
-    "name": "SpaceXAI"
   },
   "stepfun": {
     "file": "/img/logos/stepfun_small.svg",
@@ -65,10 +69,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "minimax": {
     "file": "/img/logos/minimax_small.svg",
     "name": "MiniMax"
-  },
-  "xiaomi": {
-    "file": "/img/logos/xiaomi_small.svg",
-    "name": "Xiaomi"
   },
   "nex": {
     "file": "/img/logos/nex_small.svg",
