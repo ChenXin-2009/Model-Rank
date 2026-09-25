@@ -50,10 +50,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/deepseek_small.svg",
     "name": "DeepSeek"
   },
-  "agnes-ai": {
-    "file": "/img/logos/sapiens.svg",
-    "name": "Sapiens AI"
-  },
   "motif-technologies": {
     "file": "/img/logos/motif_small.svg",
     "name": "Motif Technologies"
