@@ -58,10 +58,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/ifm_small.svg",
     "name": "Institute of Foundation Models"
   },
-  "apodex": {
-    "file": "/img/logos/apodex.svg",
-    "name": "Apodex"
-  },
   "minimax": {
     "file": "/img/logos/minimax_small.svg",
     "name": "MiniMax"
@@ -85,6 +81,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "multiversecomputing": {
     "file": "/img/logos/multiversecomputing_small.svg",
     "name": "Multiverse Computing"
+  },
+  "apodex": {
+    "file": "/img/logos/apodex.svg",
+    "name": "Apodex"
   },
   "tencent": {
     "file": "/img/logos/tencent_small.svg",
