@@ -71,11 +71,11 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "name": "Upstage"
   },
   "thinking-machines": {
-    "file": "/img/logos/thinking_machines.svg",
+    "file": "/img/logos/thinking-machines.svg",
     "name": "Thinking Machines"
   },
   "china-mobile": {
-    "file": "/img/logos/china_mobile_small.png",
+    "file": "/img/logos/china-mobile.png",
     "name": "China Mobile"
   },
   "multiversecomputing": {
