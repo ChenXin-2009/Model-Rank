@@ -50,6 +50,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/deepseek_small.svg",
     "name": "DeepSeek"
   },
+  "china-mobile": {
+    "file": "/img/logos/china-mobile.png",
+    "name": "China Mobile"
+  },
   "motif-technologies": {
     "file": "/img/logos/motif_small.svg",
     "name": "Motif Technologies"
@@ -70,14 +74,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/upstage_small.svg",
     "name": "Upstage"
   },
-  "thinking-machines": {
-    "file": "/img/logos/thinking-machines.svg",
-    "name": "Thinking Machines"
-  },
-  "china-mobile": {
-    "file": "/img/logos/china-mobile.png",
-    "name": "China Mobile"
-  },
   "multiversecomputing": {
     "file": "/img/logos/multiversecomputing_small.svg",
     "name": "Multiverse Computing"
@@ -85,6 +81,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "apodex": {
     "file": "/img/logos/apodex.svg",
     "name": "Apodex"
+  },
+  "thinking-machines": {
+    "file": "/img/logos/thinking-machines.svg",
+    "name": "Thinking Machines"
   },
   "tencent": {
     "file": "/img/logos/tencent_small.svg",
