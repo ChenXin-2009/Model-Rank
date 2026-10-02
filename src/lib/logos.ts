@@ -14,6 +14,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/openai_small.svg",
     "name": "OpenAI"
   },
+  "google": {
+    "file": "/img/logos/google_small.svg",
+    "name": "Google"
+  },
   "meta": {
     "file": "/img/logos/meta_small.svg",
     "name": "Meta"
@@ -41,10 +45,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "kimi": {
     "file": "/img/logos/kimi.jpg",
     "name": "Kimi"
-  },
-  "google": {
-    "file": "/img/logos/google_small.svg",
-    "name": "Google"
   },
   "deepseek": {
     "file": "/img/logos/deepseek_small.svg",
