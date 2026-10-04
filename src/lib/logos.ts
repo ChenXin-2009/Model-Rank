@@ -46,6 +46,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/kimi.jpg",
     "name": "Kimi"
   },
+  "inclusionai": {
+    "file": "/img/logos/inclusionai_small.jpg",
+    "name": "InclusionAI"
+  },
   "deepseek": {
     "file": "/img/logos/deepseek_small.svg",
     "name": "DeepSeek"
@@ -89,10 +93,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "tencent": {
     "file": "/img/logos/tencent_small.svg",
     "name": "Tencent"
-  },
-  "inclusionai": {
-    "file": "/img/logos/inclusionai_small.jpg",
-    "name": "InclusionAI"
   },
   "nvidia": {
     "file": "/img/logos/nvidia_small.svg",
