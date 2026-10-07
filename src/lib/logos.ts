@@ -54,6 +54,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/deepseek_small.svg",
     "name": "DeepSeek"
   },
+  "mistral": {
+    "file": "/img/logos/mistral_small.png",
+    "name": "Mistral"
+  },
   "china-mobile": {
     "file": "/img/logos/china-mobile.png",
     "name": "China Mobile"
@@ -125,10 +129,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "baidu": {
     "file": "/img/logos/baidu_small.svg",
     "name": "Baidu"
-  },
-  "mistral": {
-    "file": "/img/logos/mistral_small.png",
-    "name": "Mistral"
   },
   "aws": {
     "file": "/img/logos/aws_small.svg",
