@@ -122,10 +122,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/bytedance_small.svg",
     "name": "ByteDance Seed"
   },
-  "ibm": {
-    "file": "/img/logos/ibm_small.svg",
-    "name": "IBM"
-  },
   "baidu": {
     "file": "/img/logos/baidu_small.svg",
     "name": "Baidu"
@@ -145,6 +141,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "cohere": {
     "file": "/img/logos/cohere_small.svg",
     "name": "Cohere"
+  },
+  "ibm": {
+    "file": "/img/logos/ibm_small.svg",
+    "name": "IBM"
   },
   "openbmb": {
     "file": "/img/logos/openbmb_small.svg",
