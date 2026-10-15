@@ -58,6 +58,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/mistral_small.png",
     "name": "Mistral"
   },
+  "agnes-ai": {
+    "file": "/img/logos/sapiens.svg",
+    "name": "Sapiens AI"
+  },
   "china-mobile": {
     "file": "/img/logos/china-mobile.png",
     "name": "China Mobile"

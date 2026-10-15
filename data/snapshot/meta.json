@@ -1,10 +1,10 @@
 {
-  "date": "2026-10-14",
+  "date": "2026-10-15",
   "files": {
-    "models": 699,
-    "text-to-image": 168,
+    "models": 700,
+    "text-to-image": 102,
     "text-to-video": 32,
     "image-to-video": 77,
-    "text-to-speech": 96
+    "text-to-speech": 97
   }
 }
