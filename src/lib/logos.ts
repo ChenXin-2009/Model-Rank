@@ -90,6 +90,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/multiversecomputing_small.svg",
     "name": "Multiverse Computing"
   },
+  "nvidia": {
+    "file": "/img/logos/nvidia_small.svg",
+    "name": "NVIDIA"
+  },
   "apodex": {
     "file": "/img/logos/apodex.svg",
     "name": "Apodex"
@@ -101,10 +105,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "tencent": {
     "file": "/img/logos/tencent_small.svg",
     "name": "Tencent"
-  },
-  "nvidia": {
-    "file": "/img/logos/nvidia_small.svg",
-    "name": "NVIDIA"
   },
   "ai9star": {
     "file": "/img/logos/ai9stars.svg",
@@ -138,10 +138,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/servicenow_small.svg",
     "name": "ServiceNow"
   },
-  "inception": {
-    "file": "/img/logos/inceptionlabs_small.svg",
-    "name": "Inception"
-  },
   "cohere": {
     "file": "/img/logos/cohere_small.svg",
     "name": "Cohere"
@@ -153,6 +149,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "openbmb": {
     "file": "/img/logos/openbmb_small.svg",
     "name": "OpenBMB"
+  },
+  "inception": {
+    "file": "/img/logos/inceptionlabs_small.svg",
+    "name": "Inception"
   },
   "perplexity": {
     "file": "/img/logos/perplexity_small.png",
