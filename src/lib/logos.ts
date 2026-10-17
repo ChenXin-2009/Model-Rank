@@ -74,6 +74,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/ifm_small.svg",
     "name": "Institute of Foundation Models"
   },
+  "reflection": {
+    "file": "/img/logos/reflection.svg",
+    "name": "Reflection"
+  },
   "minimax": {
     "file": "/img/logos/minimax_small.svg",
     "name": "MiniMax"
@@ -82,13 +86,13 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/nex_small.svg",
     "name": "Nex AGI"
   },
-  "upstage": {
-    "file": "/img/logos/upstage_small.svg",
-    "name": "Upstage"
-  },
   "multiversecomputing": {
     "file": "/img/logos/multiversecomputing_small.svg",
     "name": "Multiverse Computing"
+  },
+  "upstage": {
+    "file": "/img/logos/upstage_small.svg",
+    "name": "Upstage"
   },
   "nvidia": {
     "file": "/img/logos/nvidia_small.svg",
