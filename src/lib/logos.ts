@@ -34,6 +34,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/alibaba_small.svg",
     "name": "Alibaba"
   },
+  "deepseek": {
+    "file": "/img/logos/deepseek_small.svg",
+    "name": "DeepSeek"
+  },
   "zai": {
     "file": "/img/logos/zai_small.svg",
     "name": "Z AI"
@@ -46,13 +50,13 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/kimi.jpg",
     "name": "Kimi"
   },
+  "minimax": {
+    "file": "/img/logos/minimax_small.svg",
+    "name": "MiniMax"
+  },
   "inclusionai": {
     "file": "/img/logos/inclusionai_small.jpg",
     "name": "InclusionAI"
-  },
-  "deepseek": {
-    "file": "/img/logos/deepseek_small.svg",
-    "name": "DeepSeek"
   },
   "mistral": {
     "file": "/img/logos/mistral_small.png",
@@ -77,10 +81,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "reflection": {
     "file": "/img/logos/reflection.svg",
     "name": "Reflection"
-  },
-  "minimax": {
-    "file": "/img/logos/minimax_small.svg",
-    "name": "MiniMax"
   },
   "nex": {
     "file": "/img/logos/nex_small.svg",
