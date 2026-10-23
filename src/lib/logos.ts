@@ -42,6 +42,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/zai_small.svg",
     "name": "Z AI"
   },
+  "inclusionai": {
+    "file": "/img/logos/inclusionai_small.jpg",
+    "name": "InclusionAI"
+  },
   "stepfun": {
     "file": "/img/logos/stepfun_small.svg",
     "name": "StepFun"
@@ -53,10 +57,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "minimax": {
     "file": "/img/logos/minimax_small.svg",
     "name": "MiniMax"
-  },
-  "inclusionai": {
-    "file": "/img/logos/inclusionai_small.jpg",
-    "name": "InclusionAI"
   },
   "mistral": {
     "file": "/img/logos/mistral_small.png",
