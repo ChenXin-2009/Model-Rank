@@ -14,6 +14,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/meta_small.svg",
     "name": "Meta"
   },
+  "kimi": {
+    "file": "/img/logos/kimi.jpg",
+    "name": "Kimi"
+  },
   "openai": {
     "file": "/img/logos/openai_small.svg",
     "name": "OpenAI"
@@ -49,10 +53,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "stepfun": {
     "file": "/img/logos/stepfun_small.svg",
     "name": "StepFun"
-  },
-  "kimi": {
-    "file": "/img/logos/kimi.jpg",
-    "name": "Kimi"
   },
   "minimax": {
     "file": "/img/logos/minimax_small.svg",
