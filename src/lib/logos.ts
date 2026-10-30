@@ -6,6 +6,10 @@ export interface CreatorLogoInfo {
 }
 
 export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
+  "google": {
+    "file": "/img/logos/google_small.svg",
+    "name": "Google"
+  },
   "anthropic": {
     "file": "/img/logos/anthropic_small.svg",
     "name": "Anthropic"
@@ -13,10 +17,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "openai": {
     "file": "/img/logos/openai_small.svg",
     "name": "OpenAI"
-  },
-  "google": {
-    "file": "/img/logos/google_small.svg",
-    "name": "Google"
   },
   "meta": {
     "file": "/img/logos/meta_small.svg",
