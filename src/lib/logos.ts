@@ -82,6 +82,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/cohere_small.svg",
     "name": "Cohere"
   },
+  "ibm": {
+    "file": "/img/logos/ibm_small.svg",
+    "name": "IBM"
+  },
   "agnes-ai": {
     "file": "/img/logos/sapiens.svg",
     "name": "Sapiens AI"
@@ -137,10 +141,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "ai9star": {
     "file": "/img/logos/ai9stars.svg",
     "name": "AI9Stars"
-  },
-  "ibm": {
-    "file": "/img/logos/ibm_small.svg",
-    "name": "IBM"
   },
   "tencent": {
     "file": "/img/logos/tencent_small.svg",
