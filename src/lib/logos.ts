@@ -62,6 +62,10 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
     "file": "/img/logos/mistral_small.png",
     "name": "Mistral"
   },
+  "nanbeige": {
+    "file": "/img/logos/nanbeige_small.png",
+    "name": "Nanbeige"
+  },
   "ifm": {
     "file": "/img/logos/ifm_small.svg",
     "name": "Institute of Foundation Models"
@@ -197,10 +201,6 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "motif-technologies": {
     "file": "/img/logos/motif_small.svg",
     "name": "Motif Technologies"
-  },
-  "nanbeige": {
-    "file": "/img/logos/nanbeige_small.png",
-    "name": "Nanbeige"
   },
   "nex": {
     "file": "/img/logos/nex_small.svg",
