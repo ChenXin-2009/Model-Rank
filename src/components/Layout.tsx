@@ -10,7 +10,7 @@ export function Header({ date }: { date: string | null }) {
           <a href="/evaluations">测评</a>
         </nav>
         <div className="header-right">
-          <span className="data-chip"><span className="dot" />数据更新 {date ?? "-"}</span>
+          <span className="data-chip" title="各榜单数据日期可能不同，详见榜单上方说明"><span className="dot" />最新数据 {date ?? "-"}</span>
         </div>
       </div>
     </header>
@@ -32,7 +32,12 @@ export function Footer({ exchange }: { exchange: ExchangeInfo }) {
       <footer className="site-footer">
         <div className="container">
           <div>
-            <p>数据来源：<a href="https://artificialanalysis.ai" target="_blank" rel="noreferrer">Artificial Analysis</a> 公开评测 · 竞技场数据每日同步</p>
+            <p>
+              数据来源：文本与语音评测 <a href="https://artificialanalysis.ai" target="_blank" rel="noreferrer">Artificial Analysis</a>
+              （经 <a href="https://llmrank.cn" target="_blank" rel="noreferrer">LLM Rank</a> 快照）· Arena 榜单{" "}
+              <a href="https://lmarena.ai" target="_blank" rel="noreferrer">LMArena</a>（
+              <a href="https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset" target="_blank" rel="noreferrer">CC BY 4.0</a>）
+            </p>
             <p style={{ marginTop: 4 }}>
               实时汇率（{exchange.source}）：1 USD = {exchange.rate} CNY{updated ? `（${updated}）` : ""} · 仅展示换算，非交易汇率
             </p>

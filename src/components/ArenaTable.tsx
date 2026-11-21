@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { ArenaCategory, ArenaModel } from "@/lib/types"
-import { ARENA_TABS } from "@/lib/constants"
 import { fmtDate, fmtNum } from "@/lib/format"
 import CreatorLogo from "@/components/CreatorLogo"
 
@@ -26,7 +25,6 @@ export default function ArenaTable({ category, models }: { category: ArenaCatego
   const [count, setCount] = useState(BATCH)
   const wrapRef = useRef<HTMLDivElement>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
-  const meta = ARENA_TABS.find((t) => t.key === category)
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -79,12 +77,7 @@ export default function ArenaTable({ category, models }: { category: ArenaCatego
   }
 
   return (
-    <div>
-      <div className="note-strip">
-        <span>
-          <strong>{meta?.source ?? category}</strong> 竞技场 Elo 评分 · 用户盲测两两投票生成，每日同步
-        </span>
-      </div>
+    <div data-arena-category={category}>
       <div className="toolbar">
         <div className="search-box">
           <span className="icon">🔍</span>

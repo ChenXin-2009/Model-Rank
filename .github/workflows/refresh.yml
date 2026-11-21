@@ -54,17 +54,36 @@ jobs:
             exit "$code"
           fi
 
+      - name: Fetch LMArena arena rankings
+        id: lmarena
+        if: always()
+        run: |
+          set +e
+          node scripts/fetch-lmarena.mjs
+          code=$?
+          set -e
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" -eq 2 ]; then
+            # LMArena 暂时不可用：保留现有 Arena 榜，不把定时任务标红
+            echo "::warning::LMArena 暂无可用数据，已保留现有 Arena 榜"
+          elif [ "$code" -ne 0 ]; then
+            exit "$code"
+          fi
+
       - name: Sync logos
-        if: steps.fetch.outputs.code == '0'
+        if: always() && (steps.fetch.outputs.code == '0' || steps.lmarena.outputs.code == '0')
         run: node scripts/sync-logos.mjs
 
       - name: Check snapshot freshness
         id: freshness
         if: always()
         run: |
-          DATE=$(node -p "require('./data/snapshot/meta.json').date")
-          AGE=$(( ( $(date -u +%s) - $(date -u -d "$DATE" +%s) ) / 86400 ))
-          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          TEXT_DATE=$(node -e "const m=require('./data/snapshot/meta.json');process.stdout.write((m.sources&&m.sources.models&&m.sources.models.date)||m.date||'')")
+          LATEST_DATE=$(node -p "require('./data/snapshot/meta.json').date")
+          if [ -z "$TEXT_DATE" ]; then TEXT_DATE="$LATEST_DATE"; fi
+          AGE=$(( ( $(date -u +%s) - $(date -u -d "$TEXT_DATE" +%s) ) / 86400 ))
+          echo "date=$TEXT_DATE" >> "$GITHUB_OUTPUT"
+          echo "latest=$LATEST_DATE" >> "$GITHUB_OUTPUT"
           echo "age=$AGE" >> "$GITHUB_OUTPUT"
           if [ "$AGE" -ge 3 ]; then
             echo "stale=true" >> "$GITHUB_OUTPUT"
@@ -76,12 +95,15 @@ jobs:
             echo ""
             echo "| 项目 | 值 |"
             echo "| --- | --- |"
-            echo "| 快照日期 | \`$DATE\` |"
-            echo "| 距今 | $AGE 天 |"
-            echo "| 上游数据 | https://llmrank.oss-rg-china-mainland.aliyuncs.com/data/$DATE/ |"
+            echo "| 最新数据日期 | \`$LATEST_DATE\` |"
+            echo "| 文本/语音快照 | \`$TEXT_DATE\`（$AGE 天前） |"
+            echo ""
+            echo "| 文件 | 来源 | 日期 |"
+            echo "| --- | --- | --- |"
+            node -e "const m=require('./data/snapshot/meta.json');for(const [k,v] of Object.entries(m.sources||{}))console.log('| '+k+' | '+(v.label||v.source||'-')+' | '+v.date+' |')"
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "$AGE" -ge 3 ]; then
-            echo "::warning::数据快照已 $AGE 天未更新（上游未发布新数据）"
+            echo "::warning::文本/语音快照已 $AGE 天未更新（LLM Rank 上游停更）"
           fi
 
       - name: Commit data changes
@@ -119,13 +141,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DATE: ${{ steps.freshness.outputs.date }}
+          LATEST: ${{ steps.freshness.outputs.latest }}
           AGE: ${{ steps.freshness.outputs.age }}
         run: |
           gh label create data-stale --repo "$GITHUB_REPOSITORY" --color FBCA04 --description "上游数据快照过期" 2>/dev/null || true
           NUM=$(gh issue list --repo "$GITHUB_REPOSITORY" --label data-stale --state open --json number --jq '.[0].number // empty')
-          BODY=$(printf '上游 OSS 最新快照为 `%s`，已 **%s 天** 未更新。\n\n刷新工作流会继续每天检查并保留最后一份可用数据；上游恢复后本 issue 会自动关闭。\n\n- 上游站点：https://llmrank.cn\n- 快照地址：https://llmrank.oss-rg-china-mainland.aliyuncs.com/data/%s/' "$DATE" "$AGE" "$DATE")
+          BODY=$(printf '文本/语音快照来自 LLM Rank（Artificial Analysis），最新为 `%s`，已 **%s 天** 未更新。\n\nArena 榜（文生图 / 文生视频 / 图生视频）已切换到 LMArena，目前最新数据为 `%s`。\n\n刷新工作流会继续每天检查并保留最后一份可用数据；LLM Rank 恢复后本 issue 会自动关闭。\n\n- LLM Rank：https://llmrank.cn\n- LMArena 数据集：https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset' "$DATE" "$AGE" "$LATEST")
           if [ -z "$NUM" ]; then
-            gh issue create --repo "$GITHUB_REPOSITORY" --title "数据快照已过期：上游暂停更新" --label data-stale --body "$BODY"
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "文本数据快照已过期：LLM Rank 上游停更" --label data-stale --body "$BODY"
           else
             gh issue edit "$NUM" --repo "$GITHUB_REPOSITORY" --body "$BODY"
           fi
@@ -138,5 +161,5 @@ jobs:
         run: |
           NUM=$(gh issue list --repo "$GITHUB_REPOSITORY" --label data-stale --state open --json number --jq '.[0].number // empty')
           if [ -n "$NUM" ]; then
-            gh issue close "$NUM" --repo "$GITHUB_REPOSITORY" --comment "上游数据已恢复，当前快照：\`$DATE\`。"
+            gh issue close "$NUM" --repo "$GITHUB_REPOSITORY" --comment "LLM Rank 文本/语音快照已恢复，当前快照：\`$DATE\`。"
           fi
