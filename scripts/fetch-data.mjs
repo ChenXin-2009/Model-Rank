@@ -11,6 +11,9 @@ const BASE = "https://llmrank.oss-rg-china-mainland.aliyuncs.com/data"
 // 可能的文件名（部分缺失，探测后保留存在的）
 const FILE_NAMES = ["models", "text-to-image", "text-to-video", "image-to-video", "text-to-speech"]
 
+// 自动探测最近多少天内的快照（上游偶尔延迟发布时仍可回退）
+const LOOKBACK_DAYS = Math.max(1, Number(process.env.SNAPSHOT_LOOKBACK_DAYS) || 30)
+
 function todayStr(offset = 0) {
   const d = new Date()
   d.setDate(d.getDate() + offset)
@@ -21,6 +24,26 @@ function todayStr(offset = 0) {
 function fallbackArgs() {
   const idx = process.argv.indexOf("--date")
   return idx >= 0 ? process.argv[idx + 1] : null
+}
+
+function ageInDays(date) {
+  const t = Date.parse(`${date}T00:00:00Z`)
+  return Number.isNaN(t) ? null : Math.max(0, Math.floor((Date.now() - t) / 86400000))
+}
+
+/** 从今天往前探测，返回最近一个有 models 数据的日期 */
+async function findLatestDate() {
+  for (let i = 0; i < LOOKBACK_DAYS; i++) {
+    const candidate = todayStr(-i)
+    try {
+      const probe = await fetchJson(`${BASE}/${candidate}/models.json`, 10000)
+      if (probe?.data?.length > 0) return candidate
+    } catch (e) {
+      // 404 表示当天没有快照，继续向前找；其它错误打日志方便排查
+      if (!/HTTP 404/.test(e.message)) console.log(`[fetch] probe ${candidate} failed: ${e.message}`)
+    }
+  }
+  return null
 }
 
 async function fetchJson(url, timeoutMs = 30000) {
@@ -63,18 +86,22 @@ async function fetchExchangeRate() {
   return { rate: 7.2, updated: null, source: "default" }
 }
 
+/**
+ * 拉取快照。
+ * @returns {Promise<0|2>} 0 = 已更新；2 = 上游没有可用快照（保留现有数据）
+ */
 async function fetchSnapshot() {
   mkdirSync(DATA_DIR, { recursive: true })
   let date = fallbackArgs()
-  if (!date) {
-    date = todayStr()
-    // 回退: 尝试最近 7 天
-    for (let i = 0; i < 7; i++) {
-      const candidate = todayStr(-i)
-      try {
-        const probe = await fetchJson(`${BASE}/${candidate}/models.json`, 10000)
-        if (probe?.data?.length > 0) { date = candidate; break }
-      } catch { /* try older */ }
+
+  if (date) {
+    console.log(`[fetch] snapshot date (manual): ${date}`)
+  } else {
+    console.log(`[fetch] probing latest snapshot (up to ${LOOKBACK_DAYS} days back)`)
+    date = await findLatestDate()
+    if (!date) {
+      console.error(`[fetch] no snapshot published in the last ${LOOKBACK_DAYS} days; keeping existing data`)
+      return 2
     }
   }
 
@@ -95,10 +122,19 @@ async function fetchSnapshot() {
     }
   }
 
+  // 没有任何文件时保持旧快照不动，避免把 meta.json 覆盖成空数据
+  if (!Object.keys(summary.files).length) {
+    console.error(`[fetch] snapshot ${date} has no usable files; keeping existing data`)
+    return 2
+  }
+
   writeFileSync(join(DATA_DIR, "meta.json"), JSON.stringify(summary, null, 2))
+  const age = ageInDays(date)
+  if (age !== null && age > 1) {
+    console.warn(`[fetch] WARNING: latest upstream snapshot is ${age} days old (${date})`)
+  }
   console.log(`[fetch] done, meta: ${JSON.stringify(summary)}`)
-  // 无数据时退出码非 0，方便 CI 判断
-  if (!Object.keys(summary.files).length) process.exit(1)
+  return 0
 }
 
 async function main() {
@@ -106,7 +142,7 @@ async function main() {
   const exchange = await fetchExchangeRate()
   writeFileSync(join(DATA_DIR, "exchange.json"), JSON.stringify(exchange, null, 2))
   console.log(`[fetch] exchange 1 USD = ${exchange.rate} CNY (${exchange.source}, ${exchange.updated ?? "n/a"})`)
-  await fetchSnapshot()
+  process.exitCode = await fetchSnapshot()
 }
 
 main().catch((e) => { console.error("[fetch] fatal:", e); process.exit(1) })

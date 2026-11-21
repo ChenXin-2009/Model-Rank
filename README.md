@@ -26,7 +26,8 @@ npm test           # 运行测试
 - 文本榜数据来自 **Artificial Analysis** 公开评测；图文音视频榜为 **LMArena** 竞技场 Elo 数据
 - 汇率：`data/snapshot/exchange.json` 每日由 `scripts/fetch-data.mjs` 从公开实时汇率接口拉取（主源 open.er-api.com，兜底 exchangerate-api.com），站点运行时再在浏览器端实时刷新；接口不可用时回退历史值/默认 7.2
 - 推送后 GitHub Actions `refresh.yml` 每日 08:10（UTC+8）自动拉取最新数据并 commit，触发 Vercel 自动重新部署
-- 手动刷新：`node scripts/fetch-data.mjs` 或 `npm run refresh`
+- 上游延迟或停更时，工作流会向前回退最多 30 天寻找最近快照，保留最后一份可用数据；连续 3 天未更新会自动创建 `data-stale` issue 告警，恢复后自动关闭
+- 手动刷新：`node scripts/fetch-data.mjs [--date YYYY-MM-DD]` 或 `npm run refresh`；也可以在 Actions 页面手动触发 `Refresh data` 并指定日期
 
 > 注意：榜单数据为公开第三方评测汇总，仅供选型参考，不构成任何能力或质量保证。
 
