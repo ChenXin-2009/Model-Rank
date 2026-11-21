@@ -5,30 +5,138 @@ on:
     # 每日 08:10 UTC+8（00:10 UTC）
     - cron: "10 0 * * *"
   workflow_dispatch:
+    inputs:
+      date:
+        description: "指定快照日期（YYYY-MM-DD），留空则自动探测最新可用日期"
+        required: false
+        type: string
 
 permissions:
   contents: write
+  issues: write
+
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
+
       - run: npm ci
-      - run: node scripts/fetch-data.mjs
-      - run: node scripts/sync-logos.mjs
+
+      - name: Fetch data snapshot
+        id: fetch
+        env:
+          SNAPSHOT_DATE: ${{ inputs.date }}
+          SNAPSHOT_LOOKBACK_DAYS: "30"
+        run: |
+          args=()
+          if [ -n "$SNAPSHOT_DATE" ]; then
+            args+=(--date "$SNAPSHOT_DATE")
+          fi
+          set +e
+          node scripts/fetch-data.mjs "${args[@]}"
+          code=$?
+          set -e
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" -eq 2 ]; then
+            # 上游没有新快照：保留旧数据，不把定时任务标红
+            echo "::warning::上游暂无可用新快照，已保留现有数据"
+          elif [ "$code" -ne 0 ]; then
+            exit "$code"
+          fi
+
+      - name: Sync logos
+        if: steps.fetch.outputs.code == '0'
+        run: node scripts/sync-logos.mjs
+
+      - name: Check snapshot freshness
+        id: freshness
+        if: always()
+        run: |
+          DATE=$(node -p "require('./data/snapshot/meta.json').date")
+          AGE=$(( ( $(date -u +%s) - $(date -u -d "$DATE" +%s) ) / 86400 ))
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo "age=$AGE" >> "$GITHUB_OUTPUT"
+          if [ "$AGE" -ge 3 ]; then
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "stale=false" >> "$GITHUB_OUTPUT"
+          fi
+          {
+            echo "## 数据快照"
+            echo ""
+            echo "| 项目 | 值 |"
+            echo "| --- | --- |"
+            echo "| 快照日期 | \`$DATE\` |"
+            echo "| 距今 | $AGE 天 |"
+            echo "| 上游数据 | https://llmrank.oss-rg-china-mainland.aliyuncs.com/data/$DATE/ |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$AGE" -ge 3 ]; then
+            echo "::warning::数据快照已 $AGE 天未更新（上游未发布新数据）"
+          fi
+
       - name: Commit data changes
         run: |
           git config user.name "model-rank-bot"
           git config user.email "model-rank-bot@users.noreply.github.com"
-          if git diff --quiet data/ && git diff --cached --quiet data/ && git diff --quiet public/ src/lib/logos.ts && git diff --cached --quiet public/ src/lib/logos.ts; then
+          git add data/ public/ src/lib/logos.ts
+          if git diff --cached --quiet; then
             echo "no data changes"
+            exit 0
+          fi
+
+          SNAPSHOT_CHANGED=$(git diff --cached --name-only -- \
+            data/snapshot/models.json \
+            data/snapshot/text-to-image.json \
+            data/snapshot/text-to-video.json \
+            data/snapshot/image-to-video.json \
+            data/snapshot/text-to-speech.json \
+            data/snapshot/meta.json)
+          EXCHANGE_CHANGED=$(git diff --cached --name-only -- data/snapshot/exchange.json)
+          NEW_DATE=$(node -p "require('./data/snapshot/meta.json').date")
+          if [ -n "$SNAPSHOT_CHANGED" ]; then
+            MSG="chore(data): refresh snapshot $NEW_DATE"
+          elif [ -n "$EXCHANGE_CHANGED" ]; then
+            RATE=$(node -p "require('./data/snapshot/exchange.json').rate")
+            MSG="chore(data): update exchange rate (1 USD = $RATE CNY)"
           else
-            git add data/ public/ src/lib/logos.ts
-            git commit -m "chore(data): refresh snapshot $(node -p "require('./data/snapshot/meta.json').date")"
-            git push
+            MSG="chore(data): sync provider logos"
+          fi
+          git commit -m "$MSG"
+          git push
+
+      - name: Report stale snapshot
+        if: always() && steps.freshness.outputs.stale == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE: ${{ steps.freshness.outputs.date }}
+          AGE: ${{ steps.freshness.outputs.age }}
+        run: |
+          gh label create data-stale --repo "$GITHUB_REPOSITORY" --color FBCA04 --description "上游数据快照过期" 2>/dev/null || true
+          NUM=$(gh issue list --repo "$GITHUB_REPOSITORY" --label data-stale --state open --json number --jq '.[0].number // empty')
+          BODY=$(printf '上游 OSS 最新快照为 `%s`，已 **%s 天** 未更新。\n\n刷新工作流会继续每天检查并保留最后一份可用数据；上游恢复后本 issue 会自动关闭。\n\n- 上游站点：https://llmrank.cn\n- 快照地址：https://llmrank.oss-rg-china-mainland.aliyuncs.com/data/%s/' "$DATE" "$AGE" "$DATE")
+          if [ -z "$NUM" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "数据快照已过期：上游暂停更新" --label data-stale --body "$BODY"
+          else
+            gh issue edit "$NUM" --repo "$GITHUB_REPOSITORY" --body "$BODY"
+          fi
+
+      - name: Close stale snapshot issue
+        if: always() && steps.freshness.outputs.stale == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE: ${{ steps.freshness.outputs.date }}
+        run: |
+          NUM=$(gh issue list --repo "$GITHUB_REPOSITORY" --label data-stale --state open --json number --jq '.[0].number // empty')
+          if [ -n "$NUM" ]; then
+            gh issue close "$NUM" --repo "$GITHUB_REPOSITORY" --comment "上游数据已恢复，当前快照：\`$DATE\`。"
           fi
