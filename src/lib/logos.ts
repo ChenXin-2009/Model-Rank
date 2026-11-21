@@ -241,5 +241,37 @@ export const CREATOR_LOGOS: Record<string, CreatorLogoInfo> = {
   "arcee": {
     "file": "/img/logos/arcee_small.svg",
     "name": "Arcee AI"
+  },
+  "microsoft-ai": {
+    "file": "/img/logos/microsoft-ai.svg",
+    "name": "Microsoft AI"
+  },
+  "reve": {
+    "file": "/img/logos/reve.svg",
+    "name": "Reve"
+  },
+  "bytedance": {
+    "file": "/img/logos/bytedance_small.svg",
+    "name": "ByteDance"
+  },
+  "ideogram": {
+    "file": "/img/logos/ideogram.svg",
+    "name": "Ideogram"
+  },
+  "krea": {
+    "file": "/img/logos/krea.svg",
+    "name": "Krea"
+  },
+  "hidream": {
+    "file": "/img/logos/hidream.png",
+    "name": "HiDream"
+  },
+  "runway": {
+    "file": "/img/logos/runway.svg",
+    "name": "Runway"
+  },
+  "genmo": {
+    "file": "/img/logos/genmo.png",
+    "name": "Genmo"
   }
 }

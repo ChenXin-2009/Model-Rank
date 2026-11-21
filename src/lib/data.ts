@@ -41,9 +41,12 @@ export function getAllArenaData(): Record<ArenaCategory, ArenaModel[]> {
   return out
 }
 
+export function getSnapshotMeta(): SnapshotMeta | null {
+  return readJson<SnapshotMeta>("meta.json")
+}
+
 export function getSnapshotDate(): string | null {
-  const meta = readJson<SnapshotMeta>("meta.json")
-  return meta?.date ?? null
+  return getSnapshotMeta()?.date ?? null
 }
 
 /** 按 slug 找文本模型 */

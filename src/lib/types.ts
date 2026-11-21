@@ -58,9 +58,23 @@ export interface ArenaModel {
   release_date: string | null
 }
 
+export interface SourceMeta {
+  /** 数据源标识，例如 llmrank / lmarena */
+  source: string
+  /** 展示名称 */
+  label: string
+  /** 该文件的榜单/快照日期 */
+  date: string
+  /** 数据源链接 */
+  url?: string
+}
+
 export interface SnapshotMeta {
+  /** 所有来源中最新的日期 */
   date: string
   files: Record<string, number>
+  /** 每个文件对应的来源与日期（旧快照可能没有） */
+  sources?: Record<string, SourceMeta>
 }
 
 /** 汇率快照（data/snapshot/exchange.json） */

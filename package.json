@@ -8,13 +8,14 @@
     "build": "next build",
     "export": "next build",
     "start": "next start",
-    "refresh": "node scripts/fetch-data.mjs && node scripts/sync-logos.mjs",
+    "refresh": "node scripts/fetch-data.mjs && node scripts/fetch-lmarena.mjs && node scripts/sync-logos.mjs",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --passWithNoTests"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
+    "hyparquet": "^1.33.1",
     "next": "^14.2.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"

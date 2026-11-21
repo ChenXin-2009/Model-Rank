@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import type { ArenaCategory, ArenaModel, TextModel } from "@/lib/types"
+import type { ArenaCategory, ArenaModel, SourceMeta, TextModel } from "@/lib/types"
 import { ARENA_TABS } from "@/lib/constants"
 import TextTable from "@/components/TextTable"
 import ArenaTable from "@/components/ArenaTable"
@@ -11,6 +11,8 @@ export interface HomeData {
   models: TextModel[]
   arena: Partial<Record<ArenaCategory, ArenaModel[]>>
   date: string | null
+  /** 各数据文件的来源与日期 */
+  sources: Record<string, SourceMeta>
   /** 构建期快照汇率（客户端会实时刷新） */
   rate: number
 }
@@ -28,11 +30,19 @@ export default function HomeClient({ data }: { data: HomeData }) {
 
   const [active, setActive] = useState<TabKey>("text")
 
+  const activeSource = active === "text" ? data.sources.models : data.sources[active]
+  const fallbackLabel = active === "text"
+    ? "Artificial Analysis（LLM Rank 快照）"
+    : ARENA_TABS.find((t) => t.key === active)?.source ?? active
+  const sourceLabel = activeSource?.label ?? fallbackLabel
+  const sourceDate = activeSource?.date ?? data.date
+  const olderThanLatest = Boolean(sourceDate && data.date && sourceDate < data.date)
+
   return (
     <>
       <section className="hero">
         <h1>帮开发者选择大模型</h1>
-        <p className="sub">多维度评测 · 价格 · 速度 — 数据来自公开评测，每日同步更新</p>
+        <p className="sub">多维度评测 · 价格 · 速度 — 数据来自公开评测，各榜单标注来源与日期</p>
         <div className="hero-stats">
           <div className="stat-card">
             <div className="num">{data.models.length}</div>
@@ -44,7 +54,7 @@ export default function HomeClient({ data }: { data: HomeData }) {
           </div>
           <div className="stat-card">
             <div className="num">{data.date}</div>
-            <div className="label">数据快照</div>
+            <div className="label">最新榜单日期</div>
           </div>
         </div>
       </section>
@@ -64,6 +74,17 @@ export default function HomeClient({ data }: { data: HomeData }) {
               {t.label}
             </button>
           ))}
+        </div>
+
+        <div className="note-strip">
+          <span>
+            <strong>{sourceLabel}</strong>
+            {active === "text" ? " · 综合评测与价格" : " · 用户盲测 Elo"}
+            {" · 数据日期 "}{sourceDate ?? "—"}
+            {olderThanLatest && activeSource?.source === "llmrank" && (
+              <span className="warn"> · 上游停更，展示最后可用快照</span>
+            )}
+          </span>
         </div>
 
         {active === "text" && <TextTable models={data.models} initialRate={data.rate} />}

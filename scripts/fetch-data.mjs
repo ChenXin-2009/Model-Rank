@@ -8,8 +8,9 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
 const DATA_DIR = join(ROOT, "data", "snapshot")
 const BASE = "https://llmrank.oss-rg-china-mainland.aliyuncs.com/data"
 
-// 可能的文件名（部分缺失，探测后保留存在的）
-const FILE_NAMES = ["models", "text-to-image", "text-to-video", "image-to-video", "text-to-speech"]
+// 文本与语音仍从 llmrank 拉取；三个 Arena 榜已切换到 LMArena（scripts/fetch-lmarena.mjs）
+const FILE_NAMES = ["models", "text-to-speech"]
+const LLM_RANK_LABEL = "Artificial Analysis（LLM Rank 快照）"
 
 // 自动探测最近多少天内的快照（上游偶尔延迟发布时仍可回退）
 const LOOKBACK_DAYS = Math.max(1, Number(process.env.SNAPSHOT_LOOKBACK_DAYS) || 30)
@@ -29,6 +30,16 @@ function fallbackArgs() {
 function ageInDays(date) {
   const t = Date.parse(`${date}T00:00:00Z`)
   return Number.isNaN(t) ? null : Math.max(0, Math.floor((Date.now() - t) / 86400000))
+}
+
+function readExistingMeta() {
+  const file = join(DATA_DIR, "meta.json")
+  if (!existsSync(file)) return null
+  try {
+    return JSON.parse(readFileSync(file, "utf-8"))
+  } catch {
+    return null
+  }
 }
 
 /** 从今天往前探测，返回最近一个有 models 数据的日期 */
@@ -106,7 +117,8 @@ async function fetchSnapshot() {
   }
 
   console.log(`[fetch] snapshot date: ${date}`)
-  const summary = { date, files: {} }
+  const oldMeta = readExistingMeta()
+  const summary = { date, files: {}, sources: {} }
   for (const name of FILE_NAMES) {
     const url = `${BASE}/${date}/${name}.json`
     try {
@@ -116,6 +128,12 @@ async function fetchSnapshot() {
       const file = join(DATA_DIR, `${name}.json`)
       writeFileSync(file, JSON.stringify(json, null, 0))
       summary.files[name] = rows
+      summary.sources[name] = {
+        source: "llmrank",
+        label: LLM_RANK_LABEL,
+        date,
+        url: "https://llmrank.cn",
+      }
       console.log(`[fetch] ${name}.json OK (${rows})`)
     } catch (e) {
       console.log(`[fetch] ${name}.json MISSING: ${e.message}`)
@@ -128,7 +146,27 @@ async function fetchSnapshot() {
     return 2
   }
 
-  writeFileSync(join(DATA_DIR, "meta.json"), JSON.stringify(summary, null, 2))
+  // 保留未由 llmrank 更新的文件（例如 LMArena 的 Arena 榜）及其来源日期
+  for (const [name, rows] of Object.entries(oldMeta?.files ?? {})) {
+    if (!(name in summary.files)) summary.files[name] = rows
+  }
+  for (const [name, src] of Object.entries(oldMeta?.sources ?? {})) {
+    if (!(name in summary.sources)) summary.sources[name] = src
+  }
+  for (const name of Object.keys(summary.files)) {
+    if (!summary.sources[name]) {
+      summary.sources[name] = {
+        source: "llmrank",
+        label: LLM_RANK_LABEL,
+        date: oldMeta?.date ?? date,
+        url: "https://llmrank.cn",
+      }
+    }
+  }
+  const sourceDates = Object.values(summary.sources).map((s) => s?.date).filter(Boolean).sort()
+  if (sourceDates.length) summary.date = sourceDates[sourceDates.length - 1]
+
+  writeFileSync(join(DATA_DIR, "meta.json"), JSON.stringify(summary, null, 2) + "\n")
   const age = ageInDays(date)
   if (age !== null && age > 1) {
     console.warn(`[fetch] WARNING: latest upstream snapshot is ${age} days old (${date})`)

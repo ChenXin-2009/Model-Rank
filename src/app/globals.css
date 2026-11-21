@@ -655,6 +655,7 @@ a { color: inherit; text-decoration: none; }
   flex-wrap: wrap;
 }
 .note-strip strong { color: var(--text); font-weight: 600; }
+.note-strip .warn { color: var(--gold); }
 
 /* ---------- 分页/加载 ---------- */
 .load-more {
