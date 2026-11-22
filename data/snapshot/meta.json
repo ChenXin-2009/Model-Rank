@@ -1,9 +1,9 @@
 {
-  "date": "2026-11-17",
+  "date": "2026-11-20",
   "files": {
     "models": 723,
     "text-to-speech": 103,
-    "text-to-image": 86,
+    "text-to-image": 87,
     "text-to-video": 50,
     "image-to-video": 50
   },
@@ -23,7 +23,7 @@
     "text-to-image": {
       "source": "lmarena",
       "label": "LMArena",
-      "date": "2026-11-17",
+      "date": "2026-11-20",
       "url": "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"
     },
     "text-to-video": {
